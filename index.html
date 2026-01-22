@@ -40,7 +40,7 @@
             position: absolute; top: 0; left: 0; width: 100%;
             display: flex; justify-content: space-between; align-items: center;
             padding: 20px 24px; 
-            z-index: 40; /* Visible during game, hidden by screens */
+            z-index: 40; 
             transition: opacity 0.3s;
         }
         header.fade-out { opacity: 0; pointer-events: none; }
@@ -64,7 +64,7 @@
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             text-align: center; padding: 30px;
             opacity: 0; pointer-events: none; transition: opacity 0.3s;
-            z-index: 100; /* Covers everything */
+            z-index: 100;
         }
         .screen.active { opacity: 1; pointer-events: auto; }
 
@@ -83,6 +83,39 @@
         .btn:active { transform: scale(0.98); background: #ccc; }
         .btn-outline { background: transparent; color: var(--white); border: 2px solid rgba(255,255,255,0.3); }
         .hidden { display: none !important; }
+
+        /* --- WARMUP / CONTROLS HINT --- */
+        #warmup-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            pointer-events: none; z-index: 80;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        #warmup-overlay.show { opacity: 1; }
+        
+        .control-icon {
+            width: 80px; height: 80px;
+            border: 3px solid #fff; border-radius: 10px;
+            display: flex; justify-content: center; align-items: center;
+            margin-bottom: 20px;
+            background: rgba(0,0,0,0.5);
+        }
+        
+        /* Animation for Spacebar */
+        .key-anim {
+            width: 60%; height: 20px; border: 2px solid #fff; background: transparent;
+            animation: keyPress 0.6s infinite alternate;
+        }
+        @keyframes keyPress { from { transform: scale(1); background: transparent; } to { transform: scale(0.9); background: #fff; } }
+
+        /* Animation for Tap */
+        .tap-anim {
+            width: 40px; height: 40px; border-radius: 50%; border: 3px solid #fff;
+            animation: tapPulse 0.8s infinite;
+        }
+        @keyframes tapPulse { 0% { transform: scale(1); opacity: 1; border-width: 3px; } 100% { transform: scale(2); opacity: 0; border-width: 0px; } }
+
+        .control-text { font-family: var(--font-head); font-size: 1.5rem; letter-spacing: 2px; text-transform: uppercase; }
 
         /* --- CUSTOM MODAL --- */
         #modal-overlay {
@@ -177,6 +210,12 @@
 
     <div id="game-wrap">
         <canvas id="c"></canvas>
+        
+        <div id="warmup-overlay">
+            <div class="control-icon" id="hint-icon">
+                </div>
+            <div class="control-text" id="hint-text">TAP TO JUMP</div>
+        </div>
 
         <div id="s-intro" class="screen active">
             <h1>Night<br>Run</h1>
@@ -213,8 +252,8 @@
 
     <script>
         /**
-         * FRITZ-KOLA MVP v7
-         * Fixes: Custom Modals, Header Stacking, UI Layout
+         * FRITZ-KOLA MVP v8
+         * Fixes: Controls Tutorial, Header Hiding, Modal Popups
          */
 
         const CFG = {
@@ -356,7 +395,7 @@
 
             // HUD (Moved down to avoid logo)
             ctx.fillStyle = '#fff'; ctx.font = "24px Anton";
-            ctx.fillText(`${state.score} / ${CFG.target}`, 20, 80); // Y=80 avoids Header
+            ctx.fillText(`${state.score} / ${CFG.target}`, 20, 80); 
 
             animId = requestAnimationFrame(loop);
         }
@@ -372,8 +411,36 @@
             obstacles = []; player.y = H - CFG.groundH - player.h; player.vy = 0;
             player.x = (W / 2) - (player.w / 2);
 
-            showScreen(''); // Hide menus -> Starts game
+            showScreen(''); // Hide menus
+            
+            // SHOW WARMUP HINT
+            showWarmupHint();
+            
             loop();
+        }
+        
+        function showWarmupHint() {
+            const el = document.getElementById('warmup-overlay');
+            const iconEl = document.getElementById('hint-icon');
+            const txtEl = document.getElementById('hint-text');
+            
+            // Detect Touch
+            const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+            
+            if(isTouch) {
+                iconEl.innerHTML = '<div class="tap-anim"></div>'; // Circle Pulse
+                txtEl.innerText = "TAP TO JUMP";
+            } else {
+                iconEl.innerHTML = '<div class="key-anim"></div>'; // Spacebar
+                txtEl.innerText = "PRESS SPACE";
+            }
+            
+            el.classList.add('show');
+            
+            // Hide exactly when obstacles start (2000ms)
+            setTimeout(() => {
+                el.classList.remove('show');
+            }, 1900);
         }
 
         function gameOver(win) {
@@ -446,7 +513,7 @@
             document.getElementById('m-msg').innerText = msg;
             document.getElementById('modal-overlay').classList.add('open');
         }
-        window.closeModal = function() { // Make global
+        window.closeModal = function() { 
             document.getElementById('modal-overlay').classList.remove('open');
         }
 
@@ -475,7 +542,7 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             const header = document.getElementById('main-header');
             
-            // LOGIC: Hide header if we are in Camera or Game Over to prevent layering issues
+            // Hide header if in Camera or Game Over
             if(id === 's-cam' || id === 's-over') {
                 header.classList.add('fade-out');
             } else {
