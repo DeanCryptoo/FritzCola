@@ -5,19 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>fritz-kola | THE WACH</title>
     <style>
-        /* --- IMPORTS & VARS --- */
         @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;700&display=swap');
 
         :root {
-            --fritz-black: #080808;
+            --fritz-black: #050505;
             --fritz-white: #f1f1f1;
             --fritz-red: #c91a1a;
             --ui-font: 'Anton', sans-serif;
             --body-font: 'Inter', sans-serif;
         }
 
-        /* --- RESET & BASE --- */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body {
             margin: 0; padding: 0;
@@ -25,166 +23,105 @@
             color: var(--fritz-white);
             font-family: var(--body-font);
             overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            flex-direction: column;
-            user-select: none;
-            touch-action: none; /* Disables browser zooming/scrolling */
+            height: 100vh; width: 100vw;
+            display: flex; flex-direction: column;
+            user-select: none; touch-action: none;
         }
 
-        /* --- VISUAL FX --- */
-        .crt-overlay {
+        /* VINTAGE NOISE & SCANLINES */
+        .scanlines {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 999;
-            opacity: 0.6;
+            background-size: 100% 4px; pointer-events: none; z-index: 999; opacity: 0.6;
         }
-        
         .vignette {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
-            pointer-events: none;
-            z-index: 998;
+            background: radial-gradient(circle, rgba(0,0,0,0) 50%, rgba(0,0,0,0.9) 100%);
+            pointer-events: none; z-index: 998;
         }
 
-        /* --- UI LAYOUT --- */
+        /* HEADER */
         header {
             position: absolute; top: 0; left: 0; width: 100%;
             display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 24px;
-            z-index: 50;
+            padding: 20px 24px; z-index: 50;
         }
-
         .brand { font-family: var(--ui-font); font-size: 1.8rem; letter-spacing: 1px; text-transform: uppercase; }
         .red { color: var(--fritz-red); }
-
         .stat-badge {
-            font-family: var(--ui-font);
-            font-size: 1rem;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.3);
-            padding: 8px 16px;
-            backdrop-filter: blur(4px);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-family: var(--ui-font); font-size: 1rem;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 14px; text-transform: uppercase; letter-spacing: 1px;
         }
 
-        /* --- CANVAS --- */
-        #game-wrapper {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            background: #111;
-        }
-
+        /* SCREENS */
+        #game-wrapper { position: relative; width: 100%; height: 100%; background: #111; }
         canvas { display: block; width: 100%; height: 100%; }
 
-        /* --- SCREENS --- */
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: rgba(8, 8, 8, 0.96);
-            z-index: 60;
-            opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
-            text-align: center;
-            padding: 20px;
+            background: rgba(5, 5, 5, 0.96); z-index: 60;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+            text-align: center; padding: 24px;
         }
-
         .screen.active { opacity: 1; pointer-events: auto; }
 
-        h1 { font-family: var(--ui-font); font-size: 4rem; margin: 0; line-height: 0.9; text-transform: uppercase; }
-        h2 { font-family: var(--ui-font); font-size: 2rem; margin: 0 0 10px 0; color: var(--fritz-red); text-transform: uppercase; }
-        p { color: #888; margin-bottom: 40px; font-size: 0.95rem; line-height: 1.5; max-width: 320px; }
+        h1 { font-family: var(--ui-font); font-size: 3.5rem; margin: 0; line-height: 0.9; text-transform: uppercase; }
+        h2 { font-family: var(--ui-font); font-size: 1.8rem; margin: 0 0 10px 0; color: var(--fritz-red); text-transform: uppercase; }
+        p { color: #aaa; margin-bottom: 30px; font-size: 0.95rem; line-height: 1.4; max-width: 320px; }
 
-        /* --- BUTTONS --- */
+        /* BUTTONS */
         .btn {
-            background: var(--fritz-white);
-            color: var(--fritz-black);
-            font-family: var(--ui-font);
-            font-size: 1.4rem;
-            padding: 20px 50px;
-            border: none;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            background: var(--fritz-white); color: var(--fritz-black);
+            font-family: var(--ui-font); font-size: 1.2rem;
+            padding: 18px 0; width: 100%; max-width: 280px;
+            border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
             clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-            transition: transform 0.1s, background 0.2s;
-            min-width: 240px;
+            margin-bottom: 12px; transition: transform 0.1s, background 0.2s;
         }
-        
-        .btn:active { transform: scale(0.96); background: #ccc; }
-        
-        .btn-sec {
-            background: transparent;
-            color: var(--fritz-white);
-            border: 2px solid rgba(255,255,255,0.3);
-            margin-top: 15px;
-            font-size: 1rem;
-            padding: 15px 40px;
-        }
+        .btn:active { transform: scale(0.97); background: #ccc; }
+        .btn-sec { background: transparent; color: var(--fritz-white); border: 2px solid rgba(255,255,255,0.3); }
 
-        /* --- SCANNER UI --- */
-        #scanner-ui {
-            background: #000;
+        /* EMAIL FORM */
+        .form-group { width: 100%; max-width: 280px; margin-bottom: 15px; text-align: left; }
+        .input-label { font-size: 0.7rem; color: var(--fritz-red); text-transform: uppercase; margin-bottom: 5px; display: block; font-weight: bold; }
+        input[type="email"] {
+            width: 100%; background: #000; border: 2px solid #333; color: #fff;
+            padding: 15px; font-family: 'Courier New', monospace; font-size: 1rem;
+            border-radius: 0; -webkit-appearance: none;
         }
-        
-        .camera-viewport {
-            position: relative;
-            width: 100%; height: 100%;
-            overflow: hidden;
-        }
-        
-        video {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            opacity: 0.6; /* Dim the real world to make UI pop */
-        }
+        input[type="email"]:focus { border-color: var(--fritz-white); }
+        .hidden { display: none !important; }
 
+        /* SCANNER UI */
+        #scanner-ui { background: #000; padding: 0; }
+        .camera-viewport { position: relative; width: 100%; height: 100%; overflow: hidden; }
+        video { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
         .scan-guides {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 280px; height: 280px;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 250px; height: 250px; border: 1px solid rgba(255,255,255,0.3);
         }
-
-        /* Corners */
-        .corner {
-            position: absolute; width: 40px; height: 40px;
-            border-color: var(--fritz-white); border-style: solid;
-            transition: all 0.3s;
+        .corner { position: absolute; width: 20px; height: 20px; border-color: var(--fritz-white); border-style: solid; }
+        .tl { top: -2px; left: -2px; border-width: 4px 0 0 4px; }
+        .tr { top: -2px; right: -2px; border-width: 4px 4px 0 0; }
+        .bl { bottom: -2px; left: -2px; border-width: 0 0 4px 4px; }
+        .br { bottom: -2px; right: -2px; border-width: 0 4px 4px 0; }
+        .scan-laser {
+            position: absolute; width: 110%; left: -5%; height: 2px;
+            background: var(--fritz-red); box-shadow: 0 0 15px var(--fritz-red);
+            top: 50%; animation: scan 1.5s infinite ease-in-out;
         }
-        .tl { top: 0; left: 0; border-width: 4px 0 0 4px; }
-        .tr { top: 0; right: 0; border-width: 4px 4px 0 0; }
-        .bl { bottom: 0; left: 0; border-width: 0 0 4px 4px; }
-        .br { bottom: 0; right: 0; border-width: 0 4px 4px 0; }
-
-        .scan-line {
-            position: absolute; width: 100%; height: 2px;
-            background: var(--fritz-red);
-            box-shadow: 0 0 10px var(--fritz-red);
-            top: 10%;
-            animation: scanMove 2s infinite ease-in-out;
-        }
-
-        @keyframes scanMove { 0% { top: 5%; opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { top: 95%; opacity: 0; } }
-
-        .scan-data {
-            position: absolute; bottom: 80px; width: 100%;
-            text-align: center;
-            font-family: monospace; color: var(--fritz-red);
-            font-size: 0.8rem; text-transform: uppercase;
-        }
-
-        /* HIDDEN DEV TOOLS */
-        #dev-trigger { position: absolute; bottom: 0; left: 0; width: 100%; height: 100px; z-index: 100; }
+        @keyframes scan { 0%, 100% { top: 10%; opacity: 0; } 50% { opacity: 1; } 90% { top: 90%; opacity: 0; } }
+        
+        /* DEV TRIGGER (Hidden click area for desktop testing) */
+        #dev-trigger { position: absolute; bottom: 0; left: 0; width: 100%; height: 80px; z-index: 100; }
 
     </style>
 </head>
 <body>
 
-    <div class="crt-overlay"></div>
+    <div class="scanlines"></div>
     <div class="vignette"></div>
 
     <header>
@@ -197,42 +134,70 @@
 
         <div id="s-intro" class="screen active">
             <h1>Stay<br>Awake</h1>
-            <p>Running low on energy? Scan a bottle to recharge your lives and enter the game.</p>
+            <p id="intro-msg">System Offline.<br>Scan a bottle to recharge lives.</p>
             <button class="btn" id="btn-scan">Scan Bottle</button>
-            <button class="btn btn-sec hidden" id="btn-play">Start Running</button>
+            <button class="btn btn-sec hidden" id="btn-play">Run</button>
         </div>
 
-        <div id="s-scanner" class="screen" style="background:black; padding:0;">
+        <div id="s-scanner" class="screen">
             <div class="camera-viewport">
                 <video id="cam-feed" playsinline autoplay muted></video>
                 <div class="scan-guides">
                     <div class="corner tl"></div><div class="corner tr"></div>
                     <div class="corner bl"></div><div class="corner br"></div>
-                    <div class="scan-line"></div>
+                    <div class="scan-laser"></div>
                 </div>
-                <div class="scan-data">Initializing Optical Sensors...</div>
+                <div style="position: absolute; bottom: 20%; width: 100%; text-align: center; font-family: monospace; color: var(--fritz-red);">SEARCHING QR...</div>
                 <div id="dev-trigger"></div>
-                <button class="btn btn-sec" style="position:absolute; top:40px; right:20px; width:auto; min-width:auto; padding:10px 20px; font-size:0.8rem;" id="btn-close-cam">Cancel</button>
+                <button class="btn btn-sec" style="position:absolute; top:40px; right:20px; width:auto; padding:8px 16px; font-size:0.8rem;" id="btn-close-cam">CLOSE</button>
             </div>
         </div>
 
         <div id="s-gameover" class="screen">
-            <h1 style="font-size:3rem;">SYSTEM<br>SLEEP</h1>
-            <h2 id="go-score">0 PTS</h2>
-            <p id="go-msg">You dozed off.</p>
-            <button class="btn" id="btn-retry">Try Again</button>
-            <button class="btn btn-sec" id="btn-rescan">Get More Lives</button>
+            <h1 id="go-title">ASLEEP</h1>
+            <h2 id="go-score" style="font-size: 3rem; margin: 10px 0;">0</h2>
+            <p id="go-msg">You didn't make it.</p>
+
+            <div id="email-section" class="hidden">
+                <div class="form-group">
+                    <span class="input-label">Enter Email to Claim Ticket</span>
+                    <input type="email" id="user-email" placeholder="your@email.com">
+                </div>
+                <button class="btn" id="btn-submit-ticket">Claim Ticket</button>
+            </div>
+            
+            <div id="controls-section">
+                <button class="btn" id="btn-retry">Try Again</button>
+                <button class="btn btn-sec" id="btn-rescan">Scan More</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- GAME ENGINE SETUP ---
+        // --- CONFIG ---
+        const CONFIG = {
+            gravity: 0.45,   // Reduced for easier, floatier jumps
+            jumpForce: -10.5, 
+            speed: 5,        // Starting speed
+            winScore: 10,    // Shortened game loop (approx 25 secs)
+            groundY: 0       // Set dynamically
+        };
+
+        // --- STATE ---
+        const state = {
+            lives: parseInt(localStorage.getItem('fk_lives')) || 0,
+            email: localStorage.getItem('fk_email') || null,
+            screen: 'intro',
+            score: 0,
+            isPlaying: false
+        };
+
+        // --- SETUP ---
         const canvas = document.getElementById('c');
-        const ctx = canvas.getContext('2d', { alpha: false }); // Optimize
-        let animationId;
-        
-        // Responsive Scaling
+        const ctx = canvas.getContext('2d', { alpha: false });
+        let animId;
         let W, H, scale;
+
         function resize() {
             scale = window.devicePixelRatio || 1;
             W = window.innerWidth;
@@ -240,355 +205,287 @@
             canvas.width = W * scale;
             canvas.height = H * scale;
             ctx.scale(scale, scale);
-            // Reset floor pos
-            CONFIG.groundY = H - 80; 
+            CONFIG.groundY = H - 80;
         }
         window.addEventListener('resize', resize);
-        
-        // --- CONFIG & STATE ---
-        const CONFIG = {
-            groundY: 0,
-            gravity: 0.55, // Lower = floatier/easier
-            jumpForce: -11,
-            startSpeed: 4.5,
-            accel: 0.005,
-            colors: { bg: '#111', text: '#f1f1f1', accent: '#c91a1a' }
-        };
+        resize();
 
-        const state = {
-            screen: 'intro', // intro, scanner, game, gameover
-            lives: parseInt(localStorage.getItem('fk_lives')) || 0,
-            score: 0,
-            speed: 0,
-            frames: 0
-        };
-
-        // --- ASSETS & ENTITIES ---
+        // --- ASSETS ---
+        const words = ["Zzz", "NAP", "DOZE", "SLEEP", "TIRED"];
         
-        // Particles Class
-        let particles = [];
-        class Particle {
-            constructor(x, y) {
-                this.x = x; this.y = y;
-                this.vx = (Math.random() - 0.5) * 4;
-                this.vy = (Math.random() - 1) * 2;
-                this.life = 1.0;
+        // --- GAME CLASSES ---
+        class Player {
+            constructor() {
+                this.w = 30; this.h = 70;
+                this.x = 50; this.y = CONFIG.groundY - this.h;
+                this.vy = 0; this.grounded = true;
             }
             update() {
-                this.x += this.vx; this.y += this.vy;
-                this.life -= 0.05;
-            }
-            draw() {
-                ctx.globalAlpha = this.life;
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(this.x, this.y, 3, 3);
-                ctx.globalAlpha = 1;
-            }
-        }
-
-        // Player
-        const player = {
-            x: 60, y: 0, w: 32, h: 74, vy: 0, grounded: false,
-            draw() {
-                // Shadow
-                ctx.fillStyle = 'rgba(0,0,0,0.3)';
-                if(!this.grounded) ctx.fillRect(this.x+5, CONFIG.groundY - 5, this.w-10, 5);
-
-                // Bottle Body
-                ctx.fillStyle = '#eee';
-                ctx.fillRect(this.x, this.y, this.w, this.h);
-                
-                // Label (The iconic red label)
-                ctx.fillStyle = CONFIG.colors.accent;
-                ctx.fillRect(this.x, this.y + 25, this.w, 24);
-                
-                // Logo detail (abstract)
-                ctx.fillStyle = '#fff';
-                ctx.beginPath();
-                ctx.arc(this.x + this.w/2, this.y + 37, 6, 0, Math.PI*2);
-                ctx.fill();
-
-                // Neck
-                ctx.fillStyle = '#eee';
-                ctx.fillRect(this.x + 8, this.y - 14, 16, 14);
-                
-                // Cap
-                ctx.fillStyle = '#aaa';
-                ctx.fillRect(this.x + 7, this.y - 18, 18, 4);
-            },
-            update() {
-                // Physics
                 this.vy += CONFIG.gravity;
                 this.y += this.vy;
-
-                // Ground Collision
-                if (this.y + this.h >= CONFIG.groundY) {
+                if(this.y + this.h >= CONFIG.groundY) {
                     this.y = CONFIG.groundY - this.h;
                     this.vy = 0;
-                    if (!this.grounded) {
-                        // Just landed: Spawn particles
-                        for(let i=0; i<5; i++) particles.push(new Particle(this.x + this.w/2, this.y + this.h));
-                    }
                     this.grounded = true;
                 } else {
                     this.grounded = false;
                 }
-            },
+            }
             jump() {
-                if (this.grounded) {
+                if(this.grounded) {
                     this.vy = CONFIG.jumpForce;
                     this.grounded = false;
                 }
             }
-        };
+            draw() {
+                // Shadow
+                if(!this.grounded) {
+                    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                    ctx.fillRect(this.x+5, CONFIG.groundY-4, this.w-10, 4);
+                }
+                // Bottle
+                ctx.fillStyle = '#eee'; ctx.fillRect(this.x, this.y, this.w, this.h);
+                // Label
+                ctx.fillStyle = '#c91a1a'; ctx.fillRect(this.x, this.y+25, this.w, 20);
+                // Neck
+                ctx.fillStyle = '#eee'; ctx.fillRect(this.x+8, this.y-14, 14, 14);
+                ctx.fillStyle = '#999'; ctx.fillRect(this.x+7, this.y-18, 16, 4);
+            }
+        }
 
-        // Obstacles
-        let obstacles = [];
         class Obstacle {
             constructor() {
-                this.x = W + 50;
+                this.w = 40; this.h = 30;
+                this.x = W + Math.random() * 200; // Randomize start slightly
                 this.y = CONFIG.groundY - 35;
-                this.w = 40; this.h = 35;
-                this.text = Math.random() > 0.5 ? "Zzz" : "SLEEP";
+                this.text = words[Math.floor(Math.random() * words.length)];
+                this.passed = false;
             }
-            update() {
-                this.x -= state.speed;
-            }
+            update(speed) { this.x -= speed; }
             draw() {
                 ctx.fillStyle = '#666';
-                ctx.font = "700 24px Anton";
-                ctx.fillText(this.text, this.x, this.y + 30);
+                ctx.font = "bold 22px Anton";
+                ctx.fillText(this.text, this.x, this.y + 25);
             }
         }
 
-        // Background (Parallax)
-        let bgOffset = 0;
-        function drawBackground() {
-            // Sky
-            ctx.fillStyle = '#1a1a1a';
-            ctx.fillRect(0, 0, W, H);
-            
-            // City Skyline (Procedural-ish)
-            ctx.fillStyle = '#111';
-            const buildingW = 60;
-            const numB = Math.ceil(W / buildingW) + 2;
-            const offset = (bgOffset * 0.2) % buildingW;
-            
-            for(let i=0; i<numB; i++) {
-                let h = 100 + (Math.sin(i * 132) * 50); // Pseudo-random height
-                ctx.fillRect((i * buildingW) - offset, CONFIG.groundY - h, buildingW + 1, h);
+        class Particle {
+            constructor(x, y) {
+                this.x = x; this.y = y;
+                this.vx = (Math.random()-0.5)*5; this.vy = (Math.random()-1)*3;
+                this.life = 1;
             }
-
-            // Floor
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(0, CONFIG.groundY, W, 2);
-            
-            bgOffset += state.speed;
+            update() { this.x+=this.vx; this.y+=this.vy; this.life-=0.05; }
+            draw() { ctx.fillStyle=`rgba(255,255,255,${this.life})`; ctx.fillRect(this.x,this.y,2,2); }
         }
 
-        // --- GAME LOOP ---
-        function loop() {
-            if (state.screen !== 'game') return;
+        // --- GAME ENGINE ---
+        let player, obstacles, particles, speed, buildingSeed;
 
-            // Clear
-            ctx.clearRect(0, 0, W, H);
-
-            // Update Logic
-            state.speed += CONFIG.accel;
-            state.frames++;
-            bgOffset += state.speed;
-
-            drawBackground();
-
-            // Spawn Obstacles
-            // Spawn rate depends on speed, but ensure gaps are playable
-            if (state.frames % Math.floor(100 / (state.speed/4)) === 0 && Math.random() > 0.3) {
-                obstacles.push(new Obstacle());
-            }
-
-            // Particles
-            particles.forEach((p, i) => {
-                p.update();
-                p.draw();
-                if(p.life <= 0) particles.splice(i, 1);
-            });
-
-            // Player
-            player.update();
-            player.draw();
-
-            // Obstacles Collision & Draw
-            obstacles.forEach((obs, i) => {
-                obs.update();
-                obs.draw();
-
-                // Collision Detection (Forgiving Box)
-                // We shrink the player hitbox slightly (inset 5px) to be nice
-                if (
-                    player.x + 5 < obs.x + obs.w - 5 &&
-                    player.x + player.w - 5 > obs.x + 5 &&
-                    player.y + 5 < obs.y + obs.h &&
-                    player.y + player.h > obs.y
-                ) {
-                    gameOver();
-                }
-
-                // Cleanup
-                if (obs.x + obs.w < 0) {
-                    obstacles.splice(i, 1);
-                    state.score++;
-                }
-            });
-
-            // Score HUD
-            ctx.fillStyle = '#fff';
-            ctx.font = "20px Anton";
-            ctx.fillText(`SCORE: ${state.score}`, 20, 50);
-
-            animationId = requestAnimationFrame(loop);
-        }
-
-        // --- ACTIONS ---
-        function startGame() {
-            if (state.lives <= 0) return;
+        function initGame() {
+            if(state.lives <= 0) return;
+            
+            // Deduct life
             state.lives--;
+            localStorage.setItem('fk_lives', state.lives);
             updateUI();
-            
-            // Reset
+
+            state.isPlaying = true;
             state.score = 0;
-            state.speed = CONFIG.startSpeed;
-            state.frames = 0;
+            player = new Player();
             obstacles = [];
             particles = [];
-            player.y = CONFIG.groundY - player.h;
-            player.vy = 0;
-
-            changeScreen('game'); // Actually hides overlays
-            resize(); // Ensure coords are right
+            speed = CONFIG.speed;
+            buildingSeed = Math.random() * 100; // Randomize city look every run
+            
+            changeScreen('game');
             loop();
         }
 
-        function gameOver() {
-            cancelAnimationFrame(animationId);
-            state.screen = 'gameover';
-            
-            const won = state.score >= 15; // Threshold
-            const title = document.querySelector('#s-gameover h1');
-            const sub = document.getElementById('go-score');
-            const msg = document.getElementById('go-msg');
+        function loop() {
+            if(!state.isPlaying) return;
 
-            sub.innerText = state.score + " PTS";
+            // Update
+            ctx.fillStyle = '#080808'; ctx.fillRect(0,0,W,H); // Clear
+            speed += 0.003; // Slowly increase speed
 
-            if (won) {
-                title.innerHTML = "SYSTEM<br>AWAKE";
-                title.style.color = "#fff";
-                msg.innerHTML = "Target reached.<br><span style='color:#c91a1a'>RAFFLE TICKET ADDED.</span>";
-            } else {
-                title.innerHTML = "SYSTEM<br>SLEEP";
-                title.style.color = "#c91a1a";
-                msg.innerHTML = "Not enough caffeine.<br>Reach 15 pts to win.";
+            // Draw Background (Skyline)
+            drawCity();
+
+            // Obstacle Logic
+            if(Math.random() < 0.02 && (obstacles.length === 0 || W - obstacles[obstacles.length-1].x > 250)) {
+                obstacles.push(new Obstacle());
             }
 
-            document.getElementById('s-gameover').classList.add('active');
+            obstacles.forEach((obs, i) => {
+                obs.update(speed);
+                obs.draw();
+
+                // Easier Collision (Inset Box)
+                if(player.x + 8 < obs.x + obs.w - 8 &&
+                   player.x + player.w - 8 > obs.x + 8 &&
+                   player.y + 10 < obs.y + obs.h) {
+                    gameOver();
+                }
+
+                if(obs.x + obs.w < 0) obstacles.splice(i, 1);
+                
+                // Score logic (by obstacle passed)
+                if(!obs.passed && obs.x + obs.w < player.x) {
+                    state.score++;
+                    obs.passed = true;
+                }
+            });
+
+            player.update();
+            player.draw();
+
+            // Particles on land
+            if(player.grounded && player.vy === 0 && Math.random() > 0.8) {
+                particles.push(new Particle(player.x+15, CONFIG.groundY));
+            }
+            particles.forEach((p,i) => {
+                p.update(); p.draw();
+                if(p.life<=0) particles.splice(i,1);
+            });
+
+            // HUD
+            ctx.fillStyle = '#fff'; ctx.font = "24px Anton";
+            ctx.fillText(state.score + " / " + CONFIG.winScore, 20, 50);
+
+            animId = requestAnimationFrame(loop);
+        }
+
+        function drawCity() {
+            ctx.fillStyle = '#111';
+            const bw = 50; // building width
+            const count = Math.ceil(W/bw) + 1;
+            const offset = (Date.now() * speed * 0.05) % bw;
+            
+            // Generate deterministic random buildings based on seed + index
+            for(let i=0; i<count; i++) {
+                const h = 50 + Math.abs(Math.sin(i * 13 + buildingSeed) * 150);
+                ctx.fillRect((i*bw) - offset, CONFIG.groundY - h, bw+1, h);
+            }
+            // Floor
+            ctx.fillStyle = '#fff'; ctx.fillRect(0, CONFIG.groundY, W, 2);
+        }
+
+        function gameOver() {
+            state.isPlaying = false;
+            cancelAnimationFrame(animId);
+
+            const won = state.score >= CONFIG.winScore;
+            
+            const title = document.getElementById('go-title');
+            const scoreDisp = document.getElementById('go-score');
+            const msg = document.getElementById('go-msg');
+            const emailSec = document.getElementById('email-section');
+            const ctrls = document.getElementById('controls-section');
+            const submitBtn = document.getElementById('btn-submit-ticket');
+
+            scoreDisp.innerText = state.score;
+
+            if(won) {
+                title.innerText = "AWAKE!";
+                title.style.color = "#fff";
+                msg.innerHTML = `THRESHOLD REACHED.<br><span style="color:#c91a1a">RAFFLE TICKET EARNED.</span>`;
+                
+                // Email Logic
+                if(state.email) {
+                    // Already have email
+                    msg.innerHTML += `<br><br><small>Ticket auto-registered to:<br>${state.email}</small>`;
+                    emailSec.classList.add('hidden');
+                    ctrls.classList.remove('hidden');
+                } else {
+                    // Need email
+                    emailSec.classList.remove('hidden');
+                    ctrls.classList.add('hidden'); // Hide retry until email submitted
+                    
+                    submitBtn.onclick = () => {
+                        const val = document.getElementById('user-email').value;
+                        if(val.includes('@')) {
+                            state.email = val;
+                            localStorage.setItem('fk_email', val);
+                            alert(`TICKET CONFIRMED\nSent to: ${val}`);
+                            emailSec.classList.add('hidden');
+                            ctrls.classList.remove('hidden');
+                        } else {
+                            alert("Please enter a valid email.");
+                        }
+                    };
+                }
+            } else {
+                title.innerText = "ASLEEP";
+                title.style.color = "#888";
+                msg.innerText = `You need ${CONFIG.winScore} points to win a ticket.`;
+                emailSec.classList.add('hidden');
+                ctrls.classList.remove('hidden');
+            }
+
+            changeScreen('gameover');
         }
 
         // --- SCANNER LOGIC ---
         const video = document.getElementById('cam-feed');
-        
-        async function openCamera() {
+        async function startScan() {
             changeScreen('scanner');
-            const dataTxt = document.querySelector('.scan-data');
-            
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'environment' } 
-                });
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                 video.srcObject = stream;
-                
-                // Simulation sequence
-                dataTxt.innerText = "Target Acquired...";
-                setTimeout(() => { dataTxt.innerText = "Analyzing QR Pattern..."; }, 1000);
-                setTimeout(() => { dataTxt.innerText = "Verifying Hash..."; }, 2000);
-                setTimeout(() => { 
-                    redeemSuccess(); 
-                }, 2800);
-
-            } catch (e) {
-                console.log(e);
-                dataTxt.innerText = "CAMERA ERROR / DEMO MODE";
-                // Fallback for desktop/no-cam
-            }
+                // Sim delay
+                setTimeout(() => { redeem(); }, 2000);
+            } catch(e) { console.log("Cam Error"); }
         }
-
-        function closeCamera() {
-            if(video.srcObject) {
-                video.srcObject.getTracks().forEach(t => t.stop());
-            }
-            updateUI(); // Returns to intro
+        function closeScan() {
+            if(video.srcObject) video.srcObject.getTracks().forEach(t=>t.stop());
+            updateUI();
         }
-
-        function redeemSuccess() {
-            if(state.screen !== 'scanner') return; // prevented double trigger
-            closeCamera();
+        function redeem() {
+            closeScan();
             state.lives++;
             localStorage.setItem('fk_lives', state.lives);
+            alert("BOTTLE VERIFIED.\n+1 LIFE ADDED.");
             updateUI();
-            alert("SUCCESS: 1 LIFE ADDED");
         }
 
-        // --- NAVIGATION ---
-        function changeScreen(name) {
-            state.screen = name;
+        // --- UI & CONTROLS ---
+        function changeScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            
-            if (name === 'intro') document.getElementById('s-intro').classList.add('active');
-            if (name === 'scanner') document.getElementById('s-scanner').classList.add('active');
-            if (name === 'gameover') document.getElementById('s-gameover').classList.add('active');
-            // 'game' has no DOM overlay, just canvas
+            if(id !== 'game') document.getElementById('s-'+id).classList.add('active');
         }
 
         function updateUI() {
             document.getElementById('ui-lives').innerText = state.lives;
-            const playBtn = document.getElementById('btn-play');
-            const scanBtn = document.getElementById('btn-scan');
-            const introP = document.querySelector('#s-intro p');
+            const play = document.getElementById('btn-play');
+            const scan = document.getElementById('btn-scan');
+            const txt = document.getElementById('intro-msg');
 
-            if (state.lives > 0) {
-                playBtn.classList.remove('hidden');
-                scanBtn.classList.add('hidden');
-                introP.innerText = "System Charged. Ready to initiate.";
+            if(state.lives > 0) {
+                play.classList.remove('hidden');
+                scan.classList.add('hidden');
+                txt.innerHTML = "System Charged.<br>Ready for run.";
                 changeScreen('intro');
             } else {
-                playBtn.classList.add('hidden');
-                scanBtn.classList.remove('hidden');
-                introP.innerText = "Energy Depleted. Scan a bottle to recharge.";
+                play.classList.add('hidden');
+                scan.classList.remove('hidden');
+                txt.innerHTML = "System Offline.<br>Scan a bottle to recharge.";
                 if(state.screen !== 'scanner') changeScreen('intro');
             }
         }
 
-        // --- CONTROLS ---
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' && state.screen === 'game') player.jump();
-        });
-        document.getElementById('game-wrapper').addEventListener('touchstart', (e) => {
-             if (state.screen === 'game') player.jump();
-        });
-        document.getElementById('game-wrapper').addEventListener('mousedown', (e) => {
-             if (state.screen === 'game') player.jump();
-        });
+        // Inputs
+        window.addEventListener('keydown', e => { if(e.code==='Space' && state.isPlaying) player.jump(); });
+        const wrap = document.getElementById('game-wrapper');
+        wrap.addEventListener('touchstart', e => { if(state.isPlaying) player.jump(); });
+        wrap.addEventListener('mousedown', e => { if(state.isPlaying) player.jump(); });
 
-        document.getElementById('btn-scan').onclick = openCamera;
-        document.getElementById('btn-rescan').onclick = openCamera;
-        document.getElementById('btn-close-cam').onclick = closeCamera;
-        document.getElementById('btn-play').onclick = startGame;
-        document.getElementById('btn-retry').onclick = startGame;
-        
-        // Secret tap area for desktop demo (if camera fails)
-        document.getElementById('dev-trigger').onclick = redeemSuccess;
-
-        // Init
-        resize();
-        updateUI();
+        document.getElementById('btn-play').onclick = initGame;
+        document.getElementById('btn-scan').onclick = startScan;
+        document.getElementById('btn-rescan').onclick = startScan;
+        document.getElementById('btn-close-cam').onclick = closeScan;
+        document.getElementById('btn-retry').onclick = initGame;
+        document.getElementById('dev-trigger').onclick = redeem;
 
     </script>
 </body>
