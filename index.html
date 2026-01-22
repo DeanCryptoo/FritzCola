@@ -11,7 +11,7 @@
             --bg: #050505;
             --white: #f1f1f1;
             --red: #c91a1a;
-            --yellow: #ffd700; /* New Obstacle Color */
+            --yellow: #ffd700;
             --font-head: 'Anton', sans-serif;
             --font-body: 'Inter', sans-serif;
         }
@@ -28,11 +28,11 @@
             display: flex; flex-direction: column;
         }
 
-        /* --- FX --- */
+        /* --- VISUAL NOISE --- */
         .noise {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIj48ZmlsdGVyIGlkPSJnoiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjY1IiBudW1PY3RhdmVzPSIzIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI24pIiBvcGFjaXR5PSIwLjA1Ii8+PC9zdmc+');
-            pointer-events: none; z-index: 999; opacity: 0.4;
+            pointer-events: none; z-index: 50; opacity: 0.4;
         }
 
         /* --- HEADER --- */
@@ -40,18 +40,21 @@
             position: absolute; top: 0; left: 0; width: 100%;
             display: flex; justify-content: space-between; align-items: center;
             padding: 20px 24px; 
-            z-index: 10;
+            z-index: 40; /* Visible during game, hidden by screens */
+            transition: opacity 0.3s;
         }
-        .logo { font-family: var(--font-head); font-size: 1.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        header.fade-out { opacity: 0; pointer-events: none; }
+        
+        .logo { font-family: var(--font-head); font-size: 1.8rem; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
         .red { color: var(--red); }
         .badge {
             font-family: var(--font-head); font-size: 1rem;
             border: 1px solid rgba(255,255,255,0.4); padding: 6px 12px;
-            text-transform: uppercase;
+            text-transform: uppercase; background: rgba(0,0,0,0.5);
         }
 
         /* --- CANVAS --- */
-        #game-wrap { position: relative; width: 100%; height: 100%; background: #111; }
+        #game-wrap { position: relative; width: 100%; height: 100%; background: #111; z-index: 1; }
         canvas { display: block; width: 100%; height: 100%; }
 
         /* --- SCREENS --- */
@@ -61,7 +64,7 @@
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             text-align: center; padding: 30px;
             opacity: 0; pointer-events: none; transition: opacity 0.3s;
-            z-index: 100;
+            z-index: 100; /* Covers everything */
         }
         .screen.active { opacity: 1; pointer-events: auto; }
 
@@ -81,6 +84,32 @@
         .btn-outline { background: transparent; color: var(--white); border: 2px solid rgba(255,255,255,0.3); }
         .hidden { display: none !important; }
 
+        /* --- CUSTOM MODAL --- */
+        #modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        #modal-overlay.open { opacity: 1; pointer-events: auto; }
+        
+        .modal-box {
+            background: #fff; color: #000;
+            width: 80%; max-width: 320px;
+            padding: 30px 20px;
+            text-align: center;
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #modal-overlay.open .modal-box { transform: scale(1); }
+        
+        .modal-title { font-family: var(--font-head); font-size: 1.8rem; margin-bottom: 10px; text-transform: uppercase; line-height: 1; }
+        .modal-msg { font-size: 0.9rem; margin-bottom: 20px; font-family: var(--font-body); color: #333; }
+        .modal-btn {
+            background: #000; color: #fff; border: none; padding: 12px 30px;
+            font-family: var(--font-head); font-size: 1rem; text-transform: uppercase; cursor: pointer;
+        }
+
         /* --- INPUT --- */
         input[type="email"] {
             background: transparent; border: none; border-bottom: 2px solid var(--white);
@@ -89,7 +118,7 @@
             margin-bottom: 20px; border-radius: 0;
         }
 
-        /* --- SCANNER --- */
+        /* --- SCANNER UI --- */
         #s-cam { background: #000; padding: 0; }
         .camera-container {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -121,7 +150,8 @@
         
         #btn-close-cam {
             position: absolute; top: 40px; right: 20px; 
-            width: auto; padding: 8px 16px; z-index: 200;
+            width: auto; padding: 10px 20px; z-index: 200;
+            background: rgba(0,0,0,0.5); border: 1px solid #fff;
         }
 
         #dev-tap { position: absolute; bottom: 0; left: 0; width: 100%; height: 80px; z-index: 999; }
@@ -130,9 +160,17 @@
 </head>
 <body>
 
+    <div id="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-title" id="m-title">ALERT</div>
+            <div class="modal-msg" id="m-msg">Message goes here.</div>
+            <button class="modal-btn" onclick="closeModal()">OK</button>
+        </div>
+    </div>
+
     <div class="noise"></div>
 
-    <header>
+    <header id="main-header">
         <div class="logo">fritz<span class="red">-</span>kola</div>
         <div class="badge">Lives: <span id="ui-lives">0</span></div>
     </header>
@@ -175,16 +213,12 @@
 
     <script>
         /**
-         * FRITZ-KOLA MVP v6
-         * Fixes: Center Player, Yellow Obstacles
+         * FRITZ-KOLA MVP v7
+         * Fixes: Custom Modals, Header Stacking, UI Layout
          */
 
         const CFG = {
-            gravity: 0.45,      
-            jumpForce: -11.5,   
-            groundH: 80,
-            speed: 5.0,         
-            target: 5
+            gravity: 0.45, jumpForce: -11.5, groundH: 80, speed: 5.0, target: 5
         };
 
         const state = {
@@ -200,7 +234,7 @@
         const ctx = cvs.getContext('2d', { alpha: false });
         let W, H, scale, animId;
 
-        // Player object created globally so we can update x on resize
+        // --- RESIZE & CENTER ---
         const player = {
             x: 0, y: 0, w: 34, h: 74, vy: 0, grounded: false,
             update: function() {
@@ -230,10 +264,7 @@
                 ctx.fillRect(this.x + 8, this.y - 12, 18, 12); 
             },
             getHitbox: function() {
-                return {
-                    x: this.x + 10, y: this.y + 10,       
-                    w: this.w - 20, h: this.h - 15        
-                };
+                return { x: this.x + 10, y: this.y + 10, w: this.w - 20, h: this.h - 15 };
             }
         };
 
@@ -244,35 +275,27 @@
             cvs.width = W * scale;
             cvs.height = H * scale;
             ctx.scale(scale, scale);
-            
-            // CENTER THE PLAYER
-            player.x = (W / 2) - (player.w / 2);
+            player.x = (W / 2) - (player.w / 2); // Center player
         }
         window.addEventListener('resize', resize);
         resize();
 
-        // --- ASSETS ---
+        // --- BACKGROUND ---
         let cityOffset1 = 0;
         let cityOffset2 = 0;
-        
         function drawSkyline(offset, color, heightMod, speedMod) {
             ctx.fillStyle = color;
-            const bw = 60; 
-            const count = Math.ceil(W/bw) + 1;
+            const bw = 60; const count = Math.ceil(W/bw) + 1;
             const scroll = (offset * speedMod) % bw;
-
             for(let i=0; i<count; i++) {
                 let h = 80 + Math.abs(Math.sin(i * 132 + heightMod) * 150);
                 let x = (i * bw) - scroll;
                 let y = H - CFG.groundH - h;
                 ctx.fillRect(x, y, bw+1, h);
-                // Windows
                 ctx.fillStyle = (i%3===0) ? '#333' : '#222'; 
                 if(i%2 !== 0) {
                      for(let w=0; w<3; w++) {
-                         for(let r=0; r<4; r++) {
-                             if(Math.random()>0.5) ctx.fillRect(x + 10 + (w*12), y + 20 + (r*20), 4, 4);
-                         }
+                         for(let r=0; r<4; r++) { if(Math.random()>0.5) ctx.fillRect(x + 10 + (w*12), y + 20 + (r*20), 4, 4); }
                      }
                 }
                 ctx.fillStyle = color; 
@@ -281,72 +304,49 @@
 
         let obstacles = [];
         const words = ["Zzz", "SLEEP", "TIRED", "NAP"];
-
         function spawnObstacle() {
             obstacles.push({
-                x: W + 200,              // Spawn extra far since player is in middle
-                y: H - CFG.groundH - 45, 
-                w: 60, h: 36,            
-                txt: words[Math.floor(Math.random()*words.length)],
-                passed: false
+                x: W + 200, y: H - CFG.groundH - 45, w: 60, h: 36,            
+                txt: words[Math.floor(Math.random()*words.length)], passed: false
             });
         }
 
-        // --- LOOP ---
+        // --- GAME LOOP ---
         function loop() {
             if(!state.isPlaying) return;
-
-            // Clear
-            ctx.fillStyle = '#080808';
-            ctx.fillRect(0, 0, W, H);
             
-            cityOffset1 += 2;
-            cityOffset2 += CFG.speed;
-
+            // Clear
+            ctx.fillStyle = '#080808'; ctx.fillRect(0, 0, W, H);
+            
+            // Background
+            cityOffset1 += 2; cityOffset2 += CFG.speed;
             drawSkyline(cityOffset1, '#111', 50, 0.5);
             drawSkyline(cityOffset2, '#1a1a1a', 99, 1);
+            
+            // Floor
+            ctx.fillStyle = '#fff'; ctx.fillRect(0, H - CFG.groundH, W, 2);
 
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(0, H - CFG.groundH, W, 2);
-
-            // OBSTACLE SPAWN
+            // Obstacles
             let safeToSpawn = (Date.now() - state.startTime) > 2000;
-            // Ensure distance is sufficient
             let distanceOK = obstacles.length === 0 || (W - obstacles[obstacles.length-1].x > 350);
 
-            if(safeToSpawn && distanceOK && Math.random() < 0.015) {
-                spawnObstacle();
-            }
+            if(safeToSpawn && distanceOK && Math.random() < 0.015) spawnObstacle();
 
             obstacles.forEach((o, i) => {
                 o.x -= CFG.speed;
-                
-                // --- NEW COLOR: YELLOW ---
-                ctx.fillStyle = '#FFD700'; // Bright Yellow
-                ctx.fillRect(o.x, o.y, o.w, o.h);
-                
-                ctx.fillStyle = '#000000'; // Black Text
-                ctx.font = "bold 20px Anton";
-                ctx.fillText(o.txt, o.x + 5, o.y + 26); 
+                // High-Vis Yellow
+                ctx.fillStyle = '#FFD700'; ctx.fillRect(o.x, o.y, o.w, o.h);
+                ctx.fillStyle = '#000000'; ctx.font = "bold 20px Anton"; ctx.fillText(o.txt, o.x + 5, o.y + 26); 
 
-                // COLLISION
+                // Collision
                 const p = player.getHitbox();
                 const obsBox = { x: o.x + 5, y: o.y + 5, w: o.w - 10, h: o.h - 10 }; 
-
-                if(
-                    p.x < obsBox.x + obsBox.w &&
-                    p.x + p.w > obsBox.x &&
-                    p.y < obsBox.y + obsBox.h &&
-                    p.y + p.h > obsBox.y
-                ) {
+                if(p.x < obsBox.x + obsBox.w && p.x + p.w > obsBox.x && p.y < obsBox.y + obsBox.h && p.y + p.h > obsBox.y) {
                     gameOver(false);
                 }
-
                 if(o.x + o.w < 0) obstacles.splice(i, 1);
-                
                 if(!o.passed && o.x + o.w < player.x) {
-                    state.score++;
-                    o.passed = true;
+                    state.score++; o.passed = true;
                     if(state.score >= CFG.target) gameOver(true);
                 }
             });
@@ -354,37 +354,30 @@
             player.update();
             player.draw();
 
-            ctx.fillStyle = '#fff';
-            ctx.font = "24px Anton";
-            ctx.fillText(`${state.score} / ${CFG.target}`, 20, 50);
+            // HUD (Moved down to avoid logo)
+            ctx.fillStyle = '#fff'; ctx.font = "24px Anton";
+            ctx.fillText(`${state.score} / ${CFG.target}`, 20, 80); // Y=80 avoids Header
 
             animId = requestAnimationFrame(loop);
         }
 
-        // --- CONTROLS ---
+        // --- STATE MANAGEMENT ---
         function startGame() {
             if(state.lives <= 0) return;
             state.lives--;
             saveData();
             updateUI();
 
-            state.isPlaying = true;
-            state.score = 0;
-            state.startTime = Date.now(); 
-            obstacles = [];
-            
-            // Reset player Y, keep X centered
-            player.y = H - CFG.groundH - player.h;
-            player.vy = 0;
-            player.x = (W / 2) - (player.w / 2); // Ensure centered
+            state.isPlaying = true; state.score = 0; state.startTime = Date.now(); 
+            obstacles = []; player.y = H - CFG.groundH - player.h; player.vy = 0;
+            player.x = (W / 2) - (player.w / 2);
 
-            showScreen('');
+            showScreen(''); // Hide menus -> Starts game
             loop();
         }
 
         function gameOver(win) {
-            state.isPlaying = false;
-            cancelAnimationFrame(animId);
+            state.isPlaying = false; cancelAnimationFrame(animId);
             
             const title = document.getElementById('go-title');
             const msg = document.getElementById('go-msg');
@@ -393,43 +386,35 @@
             const btnRetry = document.getElementById('btn-retry');
 
             if(win) {
-                title.innerText = "AWAKE";
-                title.style.color = "#fff";
+                title.innerText = "AWAKE"; title.style.color = "#fff";
                 if(state.email) {
                     msg.innerHTML = `Ticket registered to:<br><span class="red">${state.email}</span>`;
-                    boxEmail.classList.add('hidden');
-                    boxActs.classList.remove('hidden');
+                    boxEmail.classList.add('hidden'); boxActs.classList.remove('hidden');
                 } else {
                     msg.innerText = "Threshold Reached. Enter email to claim ticket.";
-                    boxEmail.classList.remove('hidden');
-                    boxActs.classList.add('hidden');
+                    boxEmail.classList.remove('hidden'); boxActs.classList.add('hidden');
                 }
             } else {
-                title.innerText = "ASLEEP";
-                title.style.color = "#666";
+                title.innerText = "ASLEEP"; title.style.color = "#666";
                 msg.innerText = `Score: ${state.score}. Needed: ${CFG.target}`;
-                boxEmail.classList.add('hidden');
-                boxActs.classList.remove('hidden');
+                boxEmail.classList.add('hidden'); boxActs.classList.remove('hidden');
             }
 
-            if(state.lives > 0) {
-                btnRetry.classList.remove('hidden');
-            } else {
-                btnRetry.classList.add('hidden');
-            }
+            if(state.lives > 0) btnRetry.classList.remove('hidden');
+            else btnRetry.classList.add('hidden');
+            
             showScreen('s-over');
         }
 
         function submitEmail() {
             const val = document.getElementById('inp-email').value;
             if(val.includes('@')) {
-                state.email = val;
-                saveData();
-                alert("Ticket Saved!");
+                state.email = val; saveData();
+                showModal("TICKET SAVED", "You have been entered into the raffle.");
                 document.getElementById('box-email').classList.add('hidden');
                 document.getElementById('box-actions').classList.remove('hidden');
             } else {
-                alert("Invalid Email");
+                showModal("ERROR", "Please enter a valid email address.");
             }
         }
 
@@ -451,15 +436,22 @@
             closeCam();
             state.lives++;
             saveData();
-            alert("BOTTLE VERIFIED: +1 LIFE");
+            showModal("VERIFIED", "+1 LIFE ADDED");
             updateUI();
         }
 
-        // --- UTILS ---
-        function saveData() {
-            localStorage.setItem('fk_lives', state.lives);
-            if(state.email) localStorage.setItem('fk_email', state.email);
+        // --- MODAL LOGIC ---
+        function showModal(title, msg) {
+            document.getElementById('m-title').innerText = title;
+            document.getElementById('m-msg').innerText = msg;
+            document.getElementById('modal-overlay').classList.add('open');
         }
+        window.closeModal = function() { // Make global
+            document.getElementById('modal-overlay').classList.remove('open');
+        }
+
+        // --- UTILS & UI ---
+        function saveData() { localStorage.setItem('fk_lives', state.lives); if(state.email) localStorage.setItem('fk_email', state.email); }
 
         function updateUI() {
             document.getElementById('ui-lives').innerText = state.lives;
@@ -468,13 +460,11 @@
             const msg = document.getElementById('intro-msg');
 
             if(state.lives > 0) {
-                btnP.classList.remove('hidden');
-                btnS.classList.add('hidden');
+                btnP.classList.remove('hidden'); btnS.classList.add('hidden');
                 msg.innerText = "System Charged. Ready.";
                 showScreen('s-intro');
             } else {
-                btnP.classList.add('hidden');
-                btnS.classList.remove('hidden');
+                btnP.classList.add('hidden'); btnS.classList.remove('hidden');
                 msg.innerText = "Energy Depleted. Scan bottle.";
                 if(state.screen !== 's-cam') showScreen('s-intro');
             }
@@ -483,17 +473,25 @@
         function showScreen(id) {
             state.screen = id;
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const header = document.getElementById('main-header');
+            
+            // LOGIC: Hide header if we are in Camera or Game Over to prevent layering issues
+            if(id === 's-cam' || id === 's-over') {
+                header.classList.add('fade-out');
+            } else {
+                header.classList.remove('fade-out');
+            }
+
             if(id) document.getElementById(id).classList.add('active');
         }
 
-        // --- EVENTS ---
+        // --- CONTROLS ---
         function handleJump(e) {
             if(state.isPlaying) {
                 if(e.type === 'touchstart') e.preventDefault(); 
                 player.jump();
             }
         }
-
         window.addEventListener('keydown', e => { if(e.code==='Space') handleJump(e); });
         cvs.addEventListener('touchstart', handleJump, {passive: false});
         cvs.addEventListener('mousedown', handleJump);
