@@ -3,489 +3,508 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>fritz-kola | THE WACH</title>
+    <title>fritz-kola | NIGHT RUN</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600&display=swap');
 
         :root {
-            --fritz-black: #050505;
-            --fritz-white: #f1f1f1;
-            --fritz-red: #c91a1a;
-            --ui-font: 'Anton', sans-serif;
-            --body-font: 'Inter', sans-serif;
+            --bg: #050505;
+            --white: #f1f1f1;
+            --red: #c91a1a;
+            --yellow: #ffd700; /* New Obstacle Color */
+            --font-head: 'Anton', sans-serif;
+            --font-body: 'Inter', sans-serif;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+
         body {
             margin: 0; padding: 0;
-            background-color: var(--fritz-black);
-            color: var(--fritz-white);
-            font-family: var(--body-font);
+            background-color: var(--bg);
+            color: var(--white);
+            font-family: var(--font-body);
             overflow: hidden;
             height: 100vh; width: 100vw;
             display: flex; flex-direction: column;
-            user-select: none; touch-action: none;
         }
 
-        /* VINTAGE NOISE & SCANLINES */
-        .scanlines {
+        /* --- FX --- */
+        .noise {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
-            background-size: 100% 4px; pointer-events: none; z-index: 999; opacity: 0.6;
-        }
-        .vignette {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, rgba(0,0,0,0) 50%, rgba(0,0,0,0.9) 100%);
-            pointer-events: none; z-index: 998;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIj48ZmlsdGVyIGlkPSJnoiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjY1IiBudW1PY3RhdmVzPSIzIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI24pIiBvcGFjaXR5PSIwLjA1Ii8+PC9zdmc+');
+            pointer-events: none; z-index: 999; opacity: 0.4;
         }
 
-        /* HEADER */
+        /* --- HEADER --- */
         header {
             position: absolute; top: 0; left: 0; width: 100%;
             display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 24px; z-index: 50;
+            padding: 20px 24px; 
+            z-index: 10;
         }
-        .brand { font-family: var(--ui-font); font-size: 1.8rem; letter-spacing: 1px; text-transform: uppercase; }
-        .red { color: var(--fritz-red); }
-        .stat-badge {
-            font-family: var(--ui-font); font-size: 1rem;
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
-            padding: 8px 14px; text-transform: uppercase; letter-spacing: 1px;
+        .logo { font-family: var(--font-head); font-size: 1.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .red { color: var(--red); }
+        .badge {
+            font-family: var(--font-head); font-size: 1rem;
+            border: 1px solid rgba(255,255,255,0.4); padding: 6px 12px;
+            text-transform: uppercase;
         }
 
-        /* SCREENS */
-        #game-wrapper { position: relative; width: 100%; height: 100%; background: #111; }
+        /* --- CANVAS --- */
+        #game-wrap { position: relative; width: 100%; height: 100%; background: #111; }
         canvas { display: block; width: 100%; height: 100%; }
 
+        /* --- SCREENS --- */
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5,5,5,0.98);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: rgba(5, 5, 5, 0.96); z-index: 60;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-            text-align: center; padding: 24px;
+            text-align: center; padding: 30px;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            z-index: 100;
         }
         .screen.active { opacity: 1; pointer-events: auto; }
 
-        h1 { font-family: var(--ui-font); font-size: 3.5rem; margin: 0; line-height: 0.9; text-transform: uppercase; }
-        h2 { font-family: var(--ui-font); font-size: 1.8rem; margin: 0 0 10px 0; color: var(--fritz-red); text-transform: uppercase; }
-        p { color: #aaa; margin-bottom: 30px; font-size: 0.95rem; line-height: 1.4; max-width: 320px; }
-
-        /* BUTTONS */
+        h1 { font-family: var(--font-head); font-size: 3.5rem; margin: 0; line-height: 0.9; text-transform: uppercase; }
+        p { color: #aaa; margin: 20px 0 40px 0; max-width: 300px; line-height: 1.4; }
+        
+        /* --- BUTTONS --- */
         .btn {
-            background: var(--fritz-white); color: var(--fritz-black);
-            font-family: var(--ui-font); font-size: 1.2rem;
-            padding: 18px 0; width: 100%; max-width: 280px;
+            background: var(--white); color: var(--bg);
+            font-family: var(--font-head); font-size: 1.2rem;
+            padding: 18px 0; width: 100%; max-width: 260px;
             border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+            margin-bottom: 12px;
             clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-            margin-bottom: 12px; transition: transform 0.1s, background 0.2s;
         }
-        .btn:active { transform: scale(0.97); background: #ccc; }
-        .btn-sec { background: transparent; color: var(--fritz-white); border: 2px solid rgba(255,255,255,0.3); }
-
-        /* EMAIL FORM */
-        .form-group { width: 100%; max-width: 280px; margin-bottom: 15px; text-align: left; }
-        .input-label { font-size: 0.7rem; color: var(--fritz-red); text-transform: uppercase; margin-bottom: 5px; display: block; font-weight: bold; }
-        input[type="email"] {
-            width: 100%; background: #000; border: 2px solid #333; color: #fff;
-            padding: 15px; font-family: 'Courier New', monospace; font-size: 1rem;
-            border-radius: 0; -webkit-appearance: none;
-        }
-        input[type="email"]:focus { border-color: var(--fritz-white); }
+        .btn:active { transform: scale(0.98); background: #ccc; }
+        .btn-outline { background: transparent; color: var(--white); border: 2px solid rgba(255,255,255,0.3); }
         .hidden { display: none !important; }
 
-        /* SCANNER UI */
-        #scanner-ui { background: #000; padding: 0; }
-        .camera-viewport { position: relative; width: 100%; height: 100%; overflow: hidden; }
-        video { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
-        .scan-guides {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 250px; height: 250px; border: 1px solid rgba(255,255,255,0.3);
+        /* --- INPUT --- */
+        input[type="email"] {
+            background: transparent; border: none; border-bottom: 2px solid var(--white);
+            color: var(--white); font-family: monospace; font-size: 1.2rem;
+            padding: 10px; width: 100%; max-width: 260px; text-align: center;
+            margin-bottom: 20px; border-radius: 0;
         }
-        .corner { position: absolute; width: 20px; height: 20px; border-color: var(--fritz-white); border-style: solid; }
-        .tl { top: -2px; left: -2px; border-width: 4px 0 0 4px; }
-        .tr { top: -2px; right: -2px; border-width: 4px 4px 0 0; }
-        .bl { bottom: -2px; left: -2px; border-width: 0 0 4px 4px; }
-        .br { bottom: -2px; right: -2px; border-width: 0 4px 4px 0; }
-        .scan-laser {
-            position: absolute; width: 110%; left: -5%; height: 2px;
-            background: var(--fritz-red); box-shadow: 0 0 15px var(--fritz-red);
-            top: 50%; animation: scan 1.5s infinite ease-in-out;
+
+        /* --- SCANNER --- */
+        #s-cam { background: #000; padding: 0; }
+        .camera-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden;
         }
-        @keyframes scan { 0%, 100% { top: 10%; opacity: 0; } 50% { opacity: 1; } 90% { top: 90%; opacity: 0; } }
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        .scan-mask {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 260px; height: 260px;
+            box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.85); 
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            z-index: 10;
+        }
         
-        /* DEV TRIGGER (Hidden click area for desktop testing) */
-        #dev-trigger { position: absolute; bottom: 0; left: 0; width: 100%; height: 80px; z-index: 100; }
+        .laser {
+            position: absolute; width: 100%; height: 2px;
+            background: var(--red); box-shadow: 0 0 10px var(--red);
+            animation: laser 1.8s infinite ease-in-out;
+            top: 10%;
+        }
+        @keyframes laser { 0%{top:0; opacity:0;} 50%{opacity:1;} 100%{top:100%; opacity:0;} }
+
+        .scan-msg {
+            position: absolute; top: -40px; width: 100%; text-align: center;
+            color: var(--white); font-family: var(--font-head); letter-spacing: 1px;
+        }
+        
+        #btn-close-cam {
+            position: absolute; top: 40px; right: 20px; 
+            width: auto; padding: 8px 16px; z-index: 200;
+        }
+
+        #dev-tap { position: absolute; bottom: 0; left: 0; width: 100%; height: 80px; z-index: 999; }
 
     </style>
 </head>
 <body>
 
-    <div class="scanlines"></div>
-    <div class="vignette"></div>
+    <div class="noise"></div>
 
     <header>
-        <div class="brand">fritz<span class="red">-</span>kola</div>
-        <div class="stat-badge">Lives: <span id="ui-lives">0</span></div>
+        <div class="logo">fritz<span class="red">-</span>kola</div>
+        <div class="badge">Lives: <span id="ui-lives">0</span></div>
     </header>
 
-    <div id="game-wrapper">
+    <div id="game-wrap">
         <canvas id="c"></canvas>
 
         <div id="s-intro" class="screen active">
-            <h1>Stay<br>Awake</h1>
-            <p id="intro-msg">System Offline.<br>Scan a bottle to recharge lives.</p>
+            <h1>Night<br>Run</h1>
+            <p id="intro-msg">System Offline.<br>Scan bottle to initialize.</p>
             <button class="btn" id="btn-scan">Scan Bottle</button>
-            <button class="btn btn-sec hidden" id="btn-play">Run</button>
+            <button class="btn btn-outline hidden" id="btn-play">Start Run</button>
         </div>
 
-        <div id="s-scanner" class="screen">
-            <div class="camera-viewport">
-                <video id="cam-feed" playsinline autoplay muted></video>
-                <div class="scan-guides">
-                    <div class="corner tl"></div><div class="corner tr"></div>
-                    <div class="corner bl"></div><div class="corner br"></div>
-                    <div class="scan-laser"></div>
+        <div id="s-cam" class="screen">
+            <div class="camera-container">
+                <video id="video" playsinline autoplay muted></video>
+                <div class="scan-mask">
+                    <div class="scan-msg">ALIGN QR CODE</div>
+                    <div class="laser"></div>
                 </div>
-                <div style="position: absolute; bottom: 20%; width: 100%; text-align: center; font-family: monospace; color: var(--fritz-red);">SEARCHING QR...</div>
-                <div id="dev-trigger"></div>
-                <button class="btn btn-sec" style="position:absolute; top:40px; right:20px; width:auto; padding:8px 16px; font-size:0.8rem;" id="btn-close-cam">CLOSE</button>
             </div>
+            <div id="dev-tap"></div> 
+            <button class="btn btn-outline" id="btn-close-cam">CLOSE</button>
         </div>
 
-        <div id="s-gameover" class="screen">
+        <div id="s-over" class="screen">
             <h1 id="go-title">ASLEEP</h1>
-            <h2 id="go-score" style="font-size: 3rem; margin: 10px 0;">0</h2>
-            <p id="go-msg">You didn't make it.</p>
-
-            <div id="email-section" class="hidden">
-                <div class="form-group">
-                    <span class="input-label">Enter Email to Claim Ticket</span>
-                    <input type="email" id="user-email" placeholder="your@email.com">
-                </div>
-                <button class="btn" id="btn-submit-ticket">Claim Ticket</button>
+            <p id="go-msg">Score: 0</p>
+            <div id="box-email" class="hidden">
+                <input type="email" id="inp-email" placeholder="ENTER EMAIL">
+                <button class="btn" id="btn-claim">Save Ticket</button>
             </div>
-            
-            <div id="controls-section">
+            <div id="box-actions">
                 <button class="btn" id="btn-retry">Try Again</button>
-                <button class="btn btn-sec" id="btn-rescan">Scan More</button>
+                <button class="btn btn-outline" id="btn-rescan">Scan Bottle</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- CONFIG ---
-        const CONFIG = {
-            gravity: 0.45,   // Reduced for easier, floatier jumps
-            jumpForce: -10.5, 
-            speed: 5,        // Starting speed
-            winScore: 10,    // Shortened game loop (approx 25 secs)
-            groundY: 0       // Set dynamically
+        /**
+         * FRITZ-KOLA MVP v6
+         * Fixes: Center Player, Yellow Obstacles
+         */
+
+        const CFG = {
+            gravity: 0.45,      
+            jumpForce: -11.5,   
+            groundH: 80,
+            speed: 5.0,         
+            target: 5
         };
 
-        // --- STATE ---
         const state = {
             lives: parseInt(localStorage.getItem('fk_lives')) || 0,
             email: localStorage.getItem('fk_email') || null,
-            screen: 'intro',
+            isPlaying: false,
             score: 0,
-            isPlaying: false
+            screen: 'intro',
+            startTime: 0
         };
 
-        // --- SETUP ---
-        const canvas = document.getElementById('c');
-        const ctx = canvas.getContext('2d', { alpha: false });
-        let animId;
-        let W, H, scale;
+        const cvs = document.getElementById('c');
+        const ctx = cvs.getContext('2d', { alpha: false });
+        let W, H, scale, animId;
 
-        function resize() {
-            scale = window.devicePixelRatio || 1;
-            W = window.innerWidth;
-            H = window.innerHeight;
-            canvas.width = W * scale;
-            canvas.height = H * scale;
-            ctx.scale(scale, scale);
-            CONFIG.groundY = H - 80;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        // --- ASSETS ---
-        const words = ["Zzz", "NAP", "DOZE", "SLEEP", "TIRED"];
-        
-        // --- GAME CLASSES ---
-        class Player {
-            constructor() {
-                this.w = 30; this.h = 70;
-                this.x = 50; this.y = CONFIG.groundY - this.h;
-                this.vy = 0; this.grounded = true;
-            }
-            update() {
-                this.vy += CONFIG.gravity;
+        // Player object created globally so we can update x on resize
+        const player = {
+            x: 0, y: 0, w: 34, h: 74, vy: 0, grounded: false,
+            update: function() {
+                this.vy += CFG.gravity;
                 this.y += this.vy;
-                if(this.y + this.h >= CONFIG.groundY) {
-                    this.y = CONFIG.groundY - this.h;
+                let groundY = H - CFG.groundH;
+                if(this.y + this.h >= groundY) {
+                    this.y = groundY - this.h;
                     this.vy = 0;
                     this.grounded = true;
                 } else {
                     this.grounded = false;
                 }
-            }
-            jump() {
+            },
+            jump: function() {
                 if(this.grounded) {
-                    this.vy = CONFIG.jumpForce;
+                    this.vy = CFG.jumpForce;
                     this.grounded = false;
                 }
+            },
+            draw: function() {
+                ctx.fillStyle = '#eee';
+                ctx.fillRect(this.x, this.y, this.w, this.h); 
+                ctx.fillStyle = '#c91a1a';
+                ctx.fillRect(this.x, this.y + 25, this.w, 22); 
+                ctx.fillStyle = '#ccc';
+                ctx.fillRect(this.x + 8, this.y - 12, 18, 12); 
+            },
+            getHitbox: function() {
+                return {
+                    x: this.x + 10, y: this.y + 10,       
+                    w: this.w - 20, h: this.h - 15        
+                };
             }
-            draw() {
-                // Shadow
-                if(!this.grounded) {
-                    ctx.fillStyle = 'rgba(255,255,255,0.1)';
-                    ctx.fillRect(this.x+5, CONFIG.groundY-4, this.w-10, 4);
+        };
+
+        function resize() {
+            scale = window.devicePixelRatio || 1;
+            W = window.innerWidth;
+            H = window.innerHeight;
+            cvs.width = W * scale;
+            cvs.height = H * scale;
+            ctx.scale(scale, scale);
+            
+            // CENTER THE PLAYER
+            player.x = (W / 2) - (player.w / 2);
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // --- ASSETS ---
+        let cityOffset1 = 0;
+        let cityOffset2 = 0;
+        
+        function drawSkyline(offset, color, heightMod, speedMod) {
+            ctx.fillStyle = color;
+            const bw = 60; 
+            const count = Math.ceil(W/bw) + 1;
+            const scroll = (offset * speedMod) % bw;
+
+            for(let i=0; i<count; i++) {
+                let h = 80 + Math.abs(Math.sin(i * 132 + heightMod) * 150);
+                let x = (i * bw) - scroll;
+                let y = H - CFG.groundH - h;
+                ctx.fillRect(x, y, bw+1, h);
+                // Windows
+                ctx.fillStyle = (i%3===0) ? '#333' : '#222'; 
+                if(i%2 !== 0) {
+                     for(let w=0; w<3; w++) {
+                         for(let r=0; r<4; r++) {
+                             if(Math.random()>0.5) ctx.fillRect(x + 10 + (w*12), y + 20 + (r*20), 4, 4);
+                         }
+                     }
                 }
-                // Bottle
-                ctx.fillStyle = '#eee'; ctx.fillRect(this.x, this.y, this.w, this.h);
-                // Label
-                ctx.fillStyle = '#c91a1a'; ctx.fillRect(this.x, this.y+25, this.w, 20);
-                // Neck
-                ctx.fillStyle = '#eee'; ctx.fillRect(this.x+8, this.y-14, 14, 14);
-                ctx.fillStyle = '#999'; ctx.fillRect(this.x+7, this.y-18, 16, 4);
+                ctx.fillStyle = color; 
             }
         }
 
-        class Obstacle {
-            constructor() {
-                this.w = 40; this.h = 30;
-                this.x = W + Math.random() * 200; // Randomize start slightly
-                this.y = CONFIG.groundY - 35;
-                this.text = words[Math.floor(Math.random() * words.length)];
-                this.passed = false;
-            }
-            update(speed) { this.x -= speed; }
-            draw() {
-                ctx.fillStyle = '#666';
-                ctx.font = "bold 22px Anton";
-                ctx.fillText(this.text, this.x, this.y + 25);
-            }
+        let obstacles = [];
+        const words = ["Zzz", "SLEEP", "TIRED", "NAP"];
+
+        function spawnObstacle() {
+            obstacles.push({
+                x: W + 200,              // Spawn extra far since player is in middle
+                y: H - CFG.groundH - 45, 
+                w: 60, h: 36,            
+                txt: words[Math.floor(Math.random()*words.length)],
+                passed: false
+            });
         }
 
-        class Particle {
-            constructor(x, y) {
-                this.x = x; this.y = y;
-                this.vx = (Math.random()-0.5)*5; this.vy = (Math.random()-1)*3;
-                this.life = 1;
-            }
-            update() { this.x+=this.vx; this.y+=this.vy; this.life-=0.05; }
-            draw() { ctx.fillStyle=`rgba(255,255,255,${this.life})`; ctx.fillRect(this.x,this.y,2,2); }
-        }
-
-        // --- GAME ENGINE ---
-        let player, obstacles, particles, speed, buildingSeed;
-
-        function initGame() {
-            if(state.lives <= 0) return;
-            
-            // Deduct life
-            state.lives--;
-            localStorage.setItem('fk_lives', state.lives);
-            updateUI();
-
-            state.isPlaying = true;
-            state.score = 0;
-            player = new Player();
-            obstacles = [];
-            particles = [];
-            speed = CONFIG.speed;
-            buildingSeed = Math.random() * 100; // Randomize city look every run
-            
-            changeScreen('game');
-            loop();
-        }
-
+        // --- LOOP ---
         function loop() {
             if(!state.isPlaying) return;
 
-            // Update
-            ctx.fillStyle = '#080808'; ctx.fillRect(0,0,W,H); // Clear
-            speed += 0.003; // Slowly increase speed
+            // Clear
+            ctx.fillStyle = '#080808';
+            ctx.fillRect(0, 0, W, H);
+            
+            cityOffset1 += 2;
+            cityOffset2 += CFG.speed;
 
-            // Draw Background (Skyline)
-            drawCity();
+            drawSkyline(cityOffset1, '#111', 50, 0.5);
+            drawSkyline(cityOffset2, '#1a1a1a', 99, 1);
 
-            // Obstacle Logic
-            if(Math.random() < 0.02 && (obstacles.length === 0 || W - obstacles[obstacles.length-1].x > 250)) {
-                obstacles.push(new Obstacle());
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, H - CFG.groundH, W, 2);
+
+            // OBSTACLE SPAWN
+            let safeToSpawn = (Date.now() - state.startTime) > 2000;
+            // Ensure distance is sufficient
+            let distanceOK = obstacles.length === 0 || (W - obstacles[obstacles.length-1].x > 350);
+
+            if(safeToSpawn && distanceOK && Math.random() < 0.015) {
+                spawnObstacle();
             }
 
-            obstacles.forEach((obs, i) => {
-                obs.update(speed);
-                obs.draw();
+            obstacles.forEach((o, i) => {
+                o.x -= CFG.speed;
+                
+                // --- NEW COLOR: YELLOW ---
+                ctx.fillStyle = '#FFD700'; // Bright Yellow
+                ctx.fillRect(o.x, o.y, o.w, o.h);
+                
+                ctx.fillStyle = '#000000'; // Black Text
+                ctx.font = "bold 20px Anton";
+                ctx.fillText(o.txt, o.x + 5, o.y + 26); 
 
-                // Easier Collision (Inset Box)
-                if(player.x + 8 < obs.x + obs.w - 8 &&
-                   player.x + player.w - 8 > obs.x + 8 &&
-                   player.y + 10 < obs.y + obs.h) {
-                    gameOver();
+                // COLLISION
+                const p = player.getHitbox();
+                const obsBox = { x: o.x + 5, y: o.y + 5, w: o.w - 10, h: o.h - 10 }; 
+
+                if(
+                    p.x < obsBox.x + obsBox.w &&
+                    p.x + p.w > obsBox.x &&
+                    p.y < obsBox.y + obsBox.h &&
+                    p.y + p.h > obsBox.y
+                ) {
+                    gameOver(false);
                 }
 
-                if(obs.x + obs.w < 0) obstacles.splice(i, 1);
+                if(o.x + o.w < 0) obstacles.splice(i, 1);
                 
-                // Score logic (by obstacle passed)
-                if(!obs.passed && obs.x + obs.w < player.x) {
+                if(!o.passed && o.x + o.w < player.x) {
                     state.score++;
-                    obs.passed = true;
+                    o.passed = true;
+                    if(state.score >= CFG.target) gameOver(true);
                 }
             });
 
             player.update();
             player.draw();
 
-            // Particles on land
-            if(player.grounded && player.vy === 0 && Math.random() > 0.8) {
-                particles.push(new Particle(player.x+15, CONFIG.groundY));
-            }
-            particles.forEach((p,i) => {
-                p.update(); p.draw();
-                if(p.life<=0) particles.splice(i,1);
-            });
-
-            // HUD
-            ctx.fillStyle = '#fff'; ctx.font = "24px Anton";
-            ctx.fillText(state.score + " / " + CONFIG.winScore, 20, 50);
+            ctx.fillStyle = '#fff';
+            ctx.font = "24px Anton";
+            ctx.fillText(`${state.score} / ${CFG.target}`, 20, 50);
 
             animId = requestAnimationFrame(loop);
         }
 
-        function drawCity() {
-            ctx.fillStyle = '#111';
-            const bw = 50; // building width
-            const count = Math.ceil(W/bw) + 1;
-            const offset = (Date.now() * speed * 0.05) % bw;
+        // --- CONTROLS ---
+        function startGame() {
+            if(state.lives <= 0) return;
+            state.lives--;
+            saveData();
+            updateUI();
+
+            state.isPlaying = true;
+            state.score = 0;
+            state.startTime = Date.now(); 
+            obstacles = [];
             
-            // Generate deterministic random buildings based on seed + index
-            for(let i=0; i<count; i++) {
-                const h = 50 + Math.abs(Math.sin(i * 13 + buildingSeed) * 150);
-                ctx.fillRect((i*bw) - offset, CONFIG.groundY - h, bw+1, h);
-            }
-            // Floor
-            ctx.fillStyle = '#fff'; ctx.fillRect(0, CONFIG.groundY, W, 2);
+            // Reset player Y, keep X centered
+            player.y = H - CFG.groundH - player.h;
+            player.vy = 0;
+            player.x = (W / 2) - (player.w / 2); // Ensure centered
+
+            showScreen('');
+            loop();
         }
 
-        function gameOver() {
+        function gameOver(win) {
             state.isPlaying = false;
             cancelAnimationFrame(animId);
-
-            const won = state.score >= CONFIG.winScore;
             
             const title = document.getElementById('go-title');
-            const scoreDisp = document.getElementById('go-score');
             const msg = document.getElementById('go-msg');
-            const emailSec = document.getElementById('email-section');
-            const ctrls = document.getElementById('controls-section');
-            const submitBtn = document.getElementById('btn-submit-ticket');
+            const boxEmail = document.getElementById('box-email');
+            const boxActs = document.getElementById('box-actions');
+            const btnRetry = document.getElementById('btn-retry');
 
-            scoreDisp.innerText = state.score;
-
-            if(won) {
-                title.innerText = "AWAKE!";
+            if(win) {
+                title.innerText = "AWAKE";
                 title.style.color = "#fff";
-                msg.innerHTML = `THRESHOLD REACHED.<br><span style="color:#c91a1a">RAFFLE TICKET EARNED.</span>`;
-                
-                // Email Logic
                 if(state.email) {
-                    // Already have email
-                    msg.innerHTML += `<br><br><small>Ticket auto-registered to:<br>${state.email}</small>`;
-                    emailSec.classList.add('hidden');
-                    ctrls.classList.remove('hidden');
+                    msg.innerHTML = `Ticket registered to:<br><span class="red">${state.email}</span>`;
+                    boxEmail.classList.add('hidden');
+                    boxActs.classList.remove('hidden');
                 } else {
-                    // Need email
-                    emailSec.classList.remove('hidden');
-                    ctrls.classList.add('hidden'); // Hide retry until email submitted
-                    
-                    submitBtn.onclick = () => {
-                        const val = document.getElementById('user-email').value;
-                        if(val.includes('@')) {
-                            state.email = val;
-                            localStorage.setItem('fk_email', val);
-                            alert(`TICKET CONFIRMED\nSent to: ${val}`);
-                            emailSec.classList.add('hidden');
-                            ctrls.classList.remove('hidden');
-                        } else {
-                            alert("Please enter a valid email.");
-                        }
-                    };
+                    msg.innerText = "Threshold Reached. Enter email to claim ticket.";
+                    boxEmail.classList.remove('hidden');
+                    boxActs.classList.add('hidden');
                 }
             } else {
                 title.innerText = "ASLEEP";
-                title.style.color = "#888";
-                msg.innerText = `You need ${CONFIG.winScore} points to win a ticket.`;
-                emailSec.classList.add('hidden');
-                ctrls.classList.remove('hidden');
+                title.style.color = "#666";
+                msg.innerText = `Score: ${state.score}. Needed: ${CFG.target}`;
+                boxEmail.classList.add('hidden');
+                boxActs.classList.remove('hidden');
             }
 
-            changeScreen('gameover');
+            if(state.lives > 0) {
+                btnRetry.classList.remove('hidden');
+            } else {
+                btnRetry.classList.add('hidden');
+            }
+            showScreen('s-over');
         }
 
-        // --- SCANNER LOGIC ---
-        const video = document.getElementById('cam-feed');
-        async function startScan() {
-            changeScreen('scanner');
+        function submitEmail() {
+            const val = document.getElementById('inp-email').value;
+            if(val.includes('@')) {
+                state.email = val;
+                saveData();
+                alert("Ticket Saved!");
+                document.getElementById('box-email').classList.add('hidden');
+                document.getElementById('box-actions').classList.remove('hidden');
+            } else {
+                alert("Invalid Email");
+            }
+        }
+
+        // --- CAMERA ---
+        const video = document.getElementById('video');
+        async function openCam() {
+            showScreen('s-cam');
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                 video.srcObject = stream;
-                // Sim delay
-                setTimeout(() => { redeem(); }, 2000);
-            } catch(e) { console.log("Cam Error"); }
+                setTimeout(() => redeemLife(), 2500);
+            } catch(e) { console.log(e); }
         }
-        function closeScan() {
+        function closeCam() {
             if(video.srcObject) video.srcObject.getTracks().forEach(t=>t.stop());
             updateUI();
         }
-        function redeem() {
-            closeScan();
+        function redeemLife() {
+            closeCam();
             state.lives++;
-            localStorage.setItem('fk_lives', state.lives);
-            alert("BOTTLE VERIFIED.\n+1 LIFE ADDED.");
+            saveData();
+            alert("BOTTLE VERIFIED: +1 LIFE");
             updateUI();
         }
 
-        // --- UI & CONTROLS ---
-        function changeScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            if(id !== 'game') document.getElementById('s-'+id).classList.add('active');
+        // --- UTILS ---
+        function saveData() {
+            localStorage.setItem('fk_lives', state.lives);
+            if(state.email) localStorage.setItem('fk_email', state.email);
         }
 
         function updateUI() {
             document.getElementById('ui-lives').innerText = state.lives;
-            const play = document.getElementById('btn-play');
-            const scan = document.getElementById('btn-scan');
-            const txt = document.getElementById('intro-msg');
+            const btnP = document.getElementById('btn-play');
+            const btnS = document.getElementById('btn-scan');
+            const msg = document.getElementById('intro-msg');
 
             if(state.lives > 0) {
-                play.classList.remove('hidden');
-                scan.classList.add('hidden');
-                txt.innerHTML = "System Charged.<br>Ready for run.";
-                changeScreen('intro');
+                btnP.classList.remove('hidden');
+                btnS.classList.add('hidden');
+                msg.innerText = "System Charged. Ready.";
+                showScreen('s-intro');
             } else {
-                play.classList.add('hidden');
-                scan.classList.remove('hidden');
-                txt.innerHTML = "System Offline.<br>Scan a bottle to recharge.";
-                if(state.screen !== 'scanner') changeScreen('intro');
+                btnP.classList.add('hidden');
+                btnS.classList.remove('hidden');
+                msg.innerText = "Energy Depleted. Scan bottle.";
+                if(state.screen !== 's-cam') showScreen('s-intro');
             }
         }
 
-        // Inputs
-        window.addEventListener('keydown', e => { if(e.code==='Space' && state.isPlaying) player.jump(); });
-        const wrap = document.getElementById('game-wrapper');
-        wrap.addEventListener('touchstart', e => { if(state.isPlaying) player.jump(); });
-        wrap.addEventListener('mousedown', e => { if(state.isPlaying) player.jump(); });
+        function showScreen(id) {
+            state.screen = id;
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            if(id) document.getElementById(id).classList.add('active');
+        }
 
-        document.getElementById('btn-play').onclick = initGame;
-        document.getElementById('btn-scan').onclick = startScan;
-        document.getElementById('btn-rescan').onclick = startScan;
-        document.getElementById('btn-close-cam').onclick = closeScan;
-        document.getElementById('btn-retry').onclick = initGame;
-        document.getElementById('dev-trigger').onclick = redeem;
+        // --- EVENTS ---
+        function handleJump(e) {
+            if(state.isPlaying) {
+                if(e.type === 'touchstart') e.preventDefault(); 
+                player.jump();
+            }
+        }
+
+        window.addEventListener('keydown', e => { if(e.code==='Space') handleJump(e); });
+        cvs.addEventListener('touchstart', handleJump, {passive: false});
+        cvs.addEventListener('mousedown', handleJump);
+
+        document.getElementById('btn-play').onclick = startGame;
+        document.getElementById('btn-scan').onclick = openCam;
+        document.getElementById('btn-rescan').onclick = openCam;
+        document.getElementById('btn-close-cam').onclick = closeCam;
+        document.getElementById('btn-retry').onclick = startGame;
+        document.getElementById('btn-claim').onclick = submitEmail;
+        document.getElementById('dev-tap').onclick = redeemLife;
 
     </script>
 </body>
