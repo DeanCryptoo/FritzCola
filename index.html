@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>fritz-kola | NIGHT RUN</title>
+    <title>fritz-kola | THE VAULT</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600&display=swap');
 
@@ -28,7 +28,7 @@
             display: flex; flex-direction: column;
         }
 
-        /* --- VISUAL NOISE --- */
+        /* --- VISUAL NOISE & VIGNETTE --- */
         .noise {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIj48ZmlsdGVyIGlkPSJnoiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjY1IiBudW1PY3RhdmVzPSIzIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI24pIiBvcGFjaXR5PSIwLjA1Ii8+PC9zdmc+');
@@ -43,6 +43,7 @@
             z-index: 40; 
             transition: opacity 0.3s;
         }
+        /* Hides header when screens (like camera) are active to prevent overlap */
         header.fade-out { opacity: 0; pointer-events: none; }
         
         .logo { font-family: var(--font-head); font-size: 1.8rem; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
@@ -57,7 +58,7 @@
         #game-wrap { position: relative; width: 100%; height: 100%; background: #111; z-index: 1; }
         canvas { display: block; width: 100%; height: 100%; }
 
-        /* --- SCREENS --- */
+        /* --- SCREENS (Menus) --- */
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(5,5,5,0.98);
@@ -69,8 +70,32 @@
         .screen.active { opacity: 1; pointer-events: auto; }
 
         h1 { font-family: var(--font-head); font-size: 3.5rem; margin: 0; line-height: 0.9; text-transform: uppercase; }
-        p { color: #aaa; margin: 20px 0 40px 0; max-width: 300px; line-height: 1.4; }
+        p { color: #aaa; margin: 10px 0 30px 0; max-width: 300px; line-height: 1.4; }
         
+        /* --- COLLECTION VAULT UI --- */
+        .vault-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+            margin-bottom: 30px; width: 100%; max-width: 320px;
+        }
+        .cap-slot {
+            display: flex; flex-direction: column; align-items: center; opacity: 0.3; transition: all 0.5s;
+        }
+        .cap-slot.unlocked { opacity: 1; transform: scale(1.1); filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
+        
+        .cap-circle {
+            width: 50px; height: 50px; border-radius: 50%; background: #333;
+            border: 2px solid #fff; margin-bottom: 8px; position: relative;
+            display: flex; justify-content: center; align-items: center;
+            font-family: var(--font-head); font-size: 0.8rem; color: #000;
+        }
+        
+        /* Cap Flavors */
+        .c-org { background: #fff; } 
+        .c-sugar { background: #ccc; }
+        .c-zero { background: #444; color: #fff; border-color: #888; }
+        .c-misch { background: #c91a1a; color: #fff; }
+        .cap-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; color: #888; }
+
         /* --- BUTTONS --- */
         .btn {
             background: var(--white); color: var(--bg);
@@ -84,43 +109,10 @@
         .btn-outline { background: transparent; color: var(--white); border: 2px solid rgba(255,255,255,0.3); }
         .hidden { display: none !important; }
 
-        /* --- WARMUP / CONTROLS HINT --- */
-        #warmup-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            pointer-events: none; z-index: 80;
-            opacity: 0; transition: opacity 0.2s;
-        }
-        #warmup-overlay.show { opacity: 1; }
-        
-        .control-icon {
-            width: 80px; height: 80px;
-            border: 3px solid #fff; border-radius: 10px;
-            display: flex; justify-content: center; align-items: center;
-            margin-bottom: 20px;
-            background: rgba(0,0,0,0.5);
-        }
-        
-        /* Animation for Spacebar */
-        .key-anim {
-            width: 60%; height: 20px; border: 2px solid #fff; background: transparent;
-            animation: keyPress 0.6s infinite alternate;
-        }
-        @keyframes keyPress { from { transform: scale(1); background: transparent; } to { transform: scale(0.9); background: #fff; } }
-
-        /* Animation for Tap */
-        .tap-anim {
-            width: 40px; height: 40px; border-radius: 50%; border: 3px solid #fff;
-            animation: tapPulse 0.8s infinite;
-        }
-        @keyframes tapPulse { 0% { transform: scale(1); opacity: 1; border-width: 3px; } 100% { transform: scale(2); opacity: 0; border-width: 0px; } }
-
-        .control-text { font-family: var(--font-head); font-size: 1.5rem; letter-spacing: 2px; text-transform: uppercase; }
-
         /* --- CUSTOM MODAL --- */
         #modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 9999;
+            background: rgba(0,0,0,0.85); z-index: 9999;
             display: flex; justify-content: center; align-items: center;
             opacity: 0; pointer-events: none; transition: opacity 0.3s;
         }
@@ -128,66 +120,74 @@
         
         .modal-box {
             background: #fff; color: #000;
-            width: 80%; max-width: 320px;
-            padding: 30px 20px;
-            text-align: center;
+            width: 85%; max-width: 340px;
+            padding: 30px 20px; text-align: center;
             clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
             transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         #modal-overlay.open .modal-box { transform: scale(1); }
         
         .modal-title { font-family: var(--font-head); font-size: 1.8rem; margin-bottom: 10px; text-transform: uppercase; line-height: 1; }
-        .modal-msg { font-size: 0.9rem; margin-bottom: 20px; font-family: var(--font-body); color: #333; }
+        .modal-msg { font-size: 0.9rem; margin-bottom: 20px; font-family: var(--font-body); color: #333; line-height: 1.4; }
         .modal-btn {
             background: #000; color: #fff; border: none; padding: 12px 30px;
             font-family: var(--font-head); font-size: 1rem; text-transform: uppercase; cursor: pointer;
         }
 
-        /* --- INPUT --- */
-        input[type="email"] {
-            background: transparent; border: none; border-bottom: 2px solid var(--white);
-            color: var(--white); font-family: monospace; font-size: 1.2rem;
-            padding: 10px; width: 100%; max-width: 260px; text-align: center;
-            margin-bottom: 20px; border-radius: 0;
-        }
-
-        /* --- SCANNER UI --- */
-        #s-cam { background: #000; padding: 0; }
-        .camera-container {
+        /* --- WARMUP OVERLAY --- */
+        #warmup-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            overflow: hidden;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            pointer-events: none; z-index: 80; opacity: 0; transition: opacity 0.2s;
         }
-        video { width: 100%; height: 100%; object-fit: cover; }
+        #warmup-overlay.show { opacity: 1; }
+        
+        .control-icon {
+            width: 80px; height: 80px; border: 3px solid #fff; border-radius: 10px;
+            display: flex; justify-content: center; align-items: center;
+            margin-bottom: 20px; background: rgba(0,0,0,0.5);
+        }
+        /* Animations for tutorial */
+        .key-anim { width: 60%; height: 20px; border: 2px solid #fff; animation: keyPress 0.6s infinite alternate; }
+        @keyframes keyPress { from { transform: scale(1); background: transparent; } to { transform: scale(0.9); background: #fff; } }
+        .tap-anim { width: 40px; height: 40px; border-radius: 50%; border: 3px solid #fff; animation: tapPulse 0.8s infinite; }
+        @keyframes tapPulse { 0% { transform: scale(1); opacity: 1; border-width: 3px; } 100% { transform: scale(2); opacity: 0; border-width: 0px; } }
+        .control-text { font-family: var(--font-head); font-size: 1.5rem; letter-spacing: 2px; text-transform: uppercase; }
 
+        /* --- SCANNER & INPUTS --- */
+        #s-cam { background: #000; padding: 0; }
+        .camera-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* The cutout mask */
         .scan-mask {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 260px; height: 260px;
             box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.85); 
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            z-index: 10;
+            border: 2px solid rgba(255, 255, 255, 0.8); z-index: 10;
         }
-        
         .laser {
-            position: absolute; width: 100%; height: 2px;
-            background: var(--red); box-shadow: 0 0 10px var(--red);
-            animation: laser 1.8s infinite ease-in-out;
-            top: 10%;
+            position: absolute; width: 100%; height: 2px; background: var(--red); 
+            box-shadow: 0 0 10px var(--red); animation: laser 1.8s infinite ease-in-out; top: 10%;
         }
         @keyframes laser { 0%{top:0; opacity:0;} 50%{opacity:1;} 100%{top:100%; opacity:0;} }
-
         .scan-msg {
             position: absolute; top: -40px; width: 100%; text-align: center;
             color: var(--white); font-family: var(--font-head); letter-spacing: 1px;
         }
         
         #btn-close-cam {
-            position: absolute; top: 40px; right: 20px; 
-            width: auto; padding: 10px 20px; z-index: 200;
+            position: absolute; top: 40px; right: 20px; width: auto; padding: 10px 20px; z-index: 200;
             background: rgba(0,0,0,0.5); border: 1px solid #fff;
         }
-
         #dev-tap { position: absolute; bottom: 0; left: 0; width: 100%; height: 80px; z-index: 999; }
+        
+        input[type="email"] {
+            background: transparent; border: none; border-bottom: 2px solid var(--white);
+            color: var(--white); font-family: monospace; font-size: 1.2rem;
+            padding: 10px; width: 100%; max-width: 260px; text-align: center;
+            margin-bottom: 20px; border-radius: 0;
+        }
 
     </style>
 </head>
@@ -196,7 +196,7 @@
     <div id="modal-overlay">
         <div class="modal-box">
             <div class="modal-title" id="m-title">ALERT</div>
-            <div class="modal-msg" id="m-msg">Message goes here.</div>
+            <div class="modal-msg" id="m-msg">...</div>
             <button class="modal-btn" onclick="closeModal()">OK</button>
         </div>
     </div>
@@ -212,14 +212,21 @@
         <canvas id="c"></canvas>
         
         <div id="warmup-overlay">
-            <div class="control-icon" id="hint-icon">
-                </div>
+            <div class="control-icon" id="hint-icon"></div>
             <div class="control-text" id="hint-text">TAP TO JUMP</div>
         </div>
 
         <div id="s-intro" class="screen active">
-            <h1>Night<br>Run</h1>
-            <p id="intro-msg">System Offline.<br>Scan bottle to initialize.</p>
+            <h1>The Vault</h1>
+            <p id="intro-msg">Collect 4 different caps to unlock the Grand Prize.</p>
+            
+            <div class="vault-grid">
+                <div class="cap-slot" id="cap-orig"><div class="cap-circle c-org">FK</div><div class="cap-label">Orig</div></div>
+                <div class="cap-slot" id="cap-sugar"><div class="cap-circle c-sugar">SF</div><div class="cap-label">Sugar</div></div>
+                <div class="cap-slot" id="cap-zero"><div class="cap-circle c-zero">SZ</div><div class="cap-label">Zero</div></div>
+                <div class="cap-slot" id="cap-misch"><div class="cap-circle c-misch">MM</div><div class="cap-label">Misch</div></div>
+            </div>
+
             <button class="btn" id="btn-scan">Scan Bottle</button>
             <button class="btn btn-outline hidden" id="btn-play">Start Run</button>
         </div>
@@ -245,24 +252,50 @@
             </div>
             <div id="box-actions">
                 <button class="btn" id="btn-retry">Try Again</button>
-                <button class="btn btn-outline" id="btn-rescan">Scan Bottle</button>
+                <button class="btn btn-outline" id="btn-rescan">Scan More</button>
             </div>
         </div>
     </div>
 
     <script>
         /**
-         * FRITZ-KOLA MVP v8
-         * Fixes: Controls Tutorial, Header Hiding, Modal Popups
+         * FRITZ-KOLA "BIG BRAIN" MVP
+         * Features: Database Simulation, Anti-Cheat, Collection Vault, Smooth Physics
          */
 
+        // --- GAME CONFIG ---
         const CFG = {
-            gravity: 0.45, jumpForce: -11.5, groundH: 80, speed: 5.0, target: 5
+            gravity: 0.45,       // Floaty jump
+            jumpForce: -11.5,    
+            groundH: 80,         // Floor height
+            speed: 5.0,          // Balanced speed
+            target: 5            // Score needed for a ticket
         };
 
+        // --- BACKEND SIMULATION (DATABASE) ---
+        // This object mimics what would be stored in PostgreSQL/Redis
+        const db = {
+            // Load "Used QR IDs" from local storage
+            usedIds: JSON.parse(localStorage.getItem('fk_used_ids')) || [],
+            
+            // Function to verify if a code is valid (Simulated Transaction)
+            redeemCode: function(qrId) {
+                if (this.usedIds.includes(qrId)) {
+                    return { success: false, reason: "ALREADY_USED" };
+                }
+                // If not used, mark as used and save
+                this.usedIds.push(qrId);
+                localStorage.setItem('fk_used_ids', JSON.stringify(this.usedIds));
+                return { success: true };
+            }
+        };
+
+        // --- USER STATE ---
         const state = {
             lives: parseInt(localStorage.getItem('fk_lives')) || 0,
             email: localStorage.getItem('fk_email') || null,
+            // Track which bottle caps they have found
+            collection: JSON.parse(localStorage.getItem('fk_coll')) || { orig:false, sugar:false, zero:false, misch:false },
             isPlaying: false,
             score: 0,
             screen: 'intro',
@@ -273,69 +306,57 @@
         const ctx = cvs.getContext('2d', { alpha: false });
         let W, H, scale, animId;
 
-        // --- RESIZE & CENTER ---
+        // --- GLOBAL SAVE ---
+        function saveUserState() { 
+            localStorage.setItem('fk_lives', state.lives); 
+            if(state.email) localStorage.setItem('fk_email', state.email);
+            localStorage.setItem('fk_coll', JSON.stringify(state.collection));
+        }
+
+        // --- UPDATE VAULT UI ---
+        function updateVault() {
+            if(state.collection.orig) document.getElementById('cap-orig').classList.add('unlocked');
+            if(state.collection.sugar) document.getElementById('cap-sugar').classList.add('unlocked');
+            if(state.collection.zero) document.getElementById('cap-zero').classList.add('unlocked');
+            if(state.collection.misch) document.getElementById('cap-misch').classList.add('unlocked');
+        }
+
+        // --- GAME ENGINE ---
         const player = {
             x: 0, y: 0, w: 34, h: 74, vy: 0, grounded: false,
             update: function() {
-                this.vy += CFG.gravity;
-                this.y += this.vy;
+                this.vy += CFG.gravity; this.y += this.vy;
                 let groundY = H - CFG.groundH;
-                if(this.y + this.h >= groundY) {
-                    this.y = groundY - this.h;
-                    this.vy = 0;
-                    this.grounded = true;
-                } else {
-                    this.grounded = false;
-                }
+                if(this.y + this.h >= groundY) { this.y = groundY - this.h; this.vy = 0; this.grounded = true; } 
+                else { this.grounded = false; }
             },
-            jump: function() {
-                if(this.grounded) {
-                    this.vy = CFG.jumpForce;
-                    this.grounded = false;
-                }
-            },
+            jump: function() { if(this.grounded) { this.vy = CFG.jumpForce; this.grounded = false; } },
             draw: function() {
-                ctx.fillStyle = '#eee';
-                ctx.fillRect(this.x, this.y, this.w, this.h); 
-                ctx.fillStyle = '#c91a1a';
-                ctx.fillRect(this.x, this.y + 25, this.w, 22); 
-                ctx.fillStyle = '#ccc';
-                ctx.fillRect(this.x + 8, this.y - 12, 18, 12); 
+                ctx.fillStyle = '#eee'; ctx.fillRect(this.x, this.y, this.w, this.h); 
+                ctx.fillStyle = '#c91a1a'; ctx.fillRect(this.x, this.y + 25, this.w, 22); 
+                ctx.fillStyle = '#ccc'; ctx.fillRect(this.x + 8, this.y - 12, 18, 12); 
             },
-            getHitbox: function() {
-                return { x: this.x + 10, y: this.y + 10, w: this.w - 20, h: this.h - 15 };
-            }
+            getHitbox: function() { return { x: this.x + 10, y: this.y + 10, w: this.w - 20, h: this.h - 15 }; }
         };
 
         function resize() {
-            scale = window.devicePixelRatio || 1;
-            W = window.innerWidth;
-            H = window.innerHeight;
-            cvs.width = W * scale;
-            cvs.height = H * scale;
-            ctx.scale(scale, scale);
+            scale = window.devicePixelRatio || 1; W = window.innerWidth; H = window.innerHeight;
+            cvs.width = W * scale; cvs.height = H * scale; ctx.scale(scale, scale);
             player.x = (W / 2) - (player.w / 2); // Center player
         }
         window.addEventListener('resize', resize);
         resize();
 
-        // --- BACKGROUND ---
-        let cityOffset1 = 0;
-        let cityOffset2 = 0;
+        let cityOffset1 = 0; let cityOffset2 = 0;
         function drawSkyline(offset, color, heightMod, speedMod) {
-            ctx.fillStyle = color;
-            const bw = 60; const count = Math.ceil(W/bw) + 1;
-            const scroll = (offset * speedMod) % bw;
+            ctx.fillStyle = color; const bw = 60; const count = Math.ceil(W/bw) + 1; const scroll = (offset * speedMod) % bw;
             for(let i=0; i<count; i++) {
                 let h = 80 + Math.abs(Math.sin(i * 132 + heightMod) * 150);
-                let x = (i * bw) - scroll;
-                let y = H - CFG.groundH - h;
+                let x = (i * bw) - scroll; let y = H - CFG.groundH - h;
                 ctx.fillRect(x, y, bw+1, h);
                 ctx.fillStyle = (i%3===0) ? '#333' : '#222'; 
                 if(i%2 !== 0) {
-                     for(let w=0; w<3; w++) {
-                         for(let r=0; r<4; r++) { if(Math.random()>0.5) ctx.fillRect(x + 10 + (w*12), y + 20 + (r*20), 4, 4); }
-                     }
+                     for(let w=0; w<3; w++) { for(let r=0; r<4; r++) { if(Math.random()>0.5) ctx.fillRect(x + 10 + (w*12), y + 20 + (r*20), 4, 4); } }
                 }
                 ctx.fillStyle = color; 
             }
@@ -344,108 +365,63 @@
         let obstacles = [];
         const words = ["Zzz", "SLEEP", "TIRED", "NAP"];
         function spawnObstacle() {
-            obstacles.push({
-                x: W + 200, y: H - CFG.groundH - 45, w: 60, h: 36,            
-                txt: words[Math.floor(Math.random()*words.length)], passed: false
-            });
+            obstacles.push({ x: W + 200, y: H - CFG.groundH - 45, w: 60, h: 36, txt: words[Math.floor(Math.random()*words.length)], passed: false });
         }
 
-        // --- GAME LOOP ---
+        // --- MAIN LOOP ---
         function loop() {
             if(!state.isPlaying) return;
-            
-            // Clear
             ctx.fillStyle = '#080808'; ctx.fillRect(0, 0, W, H);
             
-            // Background
             cityOffset1 += 2; cityOffset2 += CFG.speed;
-            drawSkyline(cityOffset1, '#111', 50, 0.5);
-            drawSkyline(cityOffset2, '#1a1a1a', 99, 1);
-            
-            // Floor
+            drawSkyline(cityOffset1, '#111', 50, 0.5); drawSkyline(cityOffset2, '#1a1a1a', 99, 1);
             ctx.fillStyle = '#fff'; ctx.fillRect(0, H - CFG.groundH, W, 2);
 
-            // Obstacles
             let safeToSpawn = (Date.now() - state.startTime) > 2000;
             let distanceOK = obstacles.length === 0 || (W - obstacles[obstacles.length-1].x > 350);
-
             if(safeToSpawn && distanceOK && Math.random() < 0.015) spawnObstacle();
 
             obstacles.forEach((o, i) => {
                 o.x -= CFG.speed;
-                // High-Vis Yellow
+                // High-Vis Yellow Obstacles
                 ctx.fillStyle = '#FFD700'; ctx.fillRect(o.x, o.y, o.w, o.h);
                 ctx.fillStyle = '#000000'; ctx.font = "bold 20px Anton"; ctx.fillText(o.txt, o.x + 5, o.y + 26); 
-
-                // Collision
+                
                 const p = player.getHitbox();
                 const obsBox = { x: o.x + 5, y: o.y + 5, w: o.w - 10, h: o.h - 10 }; 
-                if(p.x < obsBox.x + obsBox.w && p.x + p.w > obsBox.x && p.y < obsBox.y + obsBox.h && p.y + p.h > obsBox.y) {
-                    gameOver(false);
-                }
+                if(p.x < obsBox.x + obsBox.w && p.x + p.w > obsBox.x && p.y < obsBox.y + obsBox.h && p.y + p.h > obsBox.y) gameOver(false);
                 if(o.x + o.w < 0) obstacles.splice(i, 1);
-                if(!o.passed && o.x + o.w < player.x) {
-                    state.score++; o.passed = true;
-                    if(state.score >= CFG.target) gameOver(true);
-                }
+                if(!o.passed && o.x + o.w < player.x) { state.score++; o.passed = true; if(state.score >= CFG.target) gameOver(true); }
             });
 
-            player.update();
-            player.draw();
-
-            // HUD (Moved down to avoid logo)
-            ctx.fillStyle = '#fff'; ctx.font = "24px Anton";
-            ctx.fillText(`${state.score} / ${CFG.target}`, 20, 80); 
-
+            player.update(); player.draw();
+            // Score Position adjusted to not hit Logo
+            ctx.fillStyle = '#fff'; ctx.font = "24px Anton"; ctx.fillText(`${state.score} / ${CFG.target}`, 20, 80); 
             animId = requestAnimationFrame(loop);
         }
 
-        // --- STATE MANAGEMENT ---
+        // --- GAME CONTROLS ---
         function startGame() {
             if(state.lives <= 0) return;
-            state.lives--;
-            saveData();
-            updateUI();
-
+            state.lives--; saveUserState(); updateUI();
             state.isPlaying = true; state.score = 0; state.startTime = Date.now(); 
-            obstacles = []; player.y = H - CFG.groundH - player.h; player.vy = 0;
-            player.x = (W / 2) - (player.w / 2);
-
-            showScreen(''); // Hide menus
-            
-            // SHOW WARMUP HINT
-            showWarmupHint();
-            
-            loop();
+            obstacles = []; player.y = H - CFG.groundH - player.h; player.vy = 0; player.x = (W / 2) - (player.w / 2);
+            showScreen(''); showWarmupHint(); loop();
         }
-        
+
         function showWarmupHint() {
             const el = document.getElementById('warmup-overlay');
             const iconEl = document.getElementById('hint-icon');
             const txtEl = document.getElementById('hint-text');
-            
-            // Detect Touch
             const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-            
-            if(isTouch) {
-                iconEl.innerHTML = '<div class="tap-anim"></div>'; // Circle Pulse
-                txtEl.innerText = "TAP TO JUMP";
-            } else {
-                iconEl.innerHTML = '<div class="key-anim"></div>'; // Spacebar
-                txtEl.innerText = "PRESS SPACE";
-            }
-            
+            if(isTouch) { iconEl.innerHTML = '<div class="tap-anim"></div>'; txtEl.innerText = "TAP TO JUMP"; } 
+            else { iconEl.innerHTML = '<div class="key-anim"></div>'; txtEl.innerText = "PRESS SPACE"; }
             el.classList.add('show');
-            
-            // Hide exactly when obstacles start (2000ms)
-            setTimeout(() => {
-                el.classList.remove('show');
-            }, 1900);
+            setTimeout(() => { el.classList.remove('show'); }, 1900);
         }
 
         function gameOver(win) {
             state.isPlaying = false; cancelAnimationFrame(animId);
-            
             const title = document.getElementById('go-title');
             const msg = document.getElementById('go-msg');
             const boxEmail = document.getElementById('box-email');
@@ -466,73 +442,97 @@
                 msg.innerText = `Score: ${state.score}. Needed: ${CFG.target}`;
                 boxEmail.classList.add('hidden'); boxActs.classList.remove('hidden');
             }
-
-            if(state.lives > 0) btnRetry.classList.remove('hidden');
-            else btnRetry.classList.add('hidden');
-            
+            // Logic: Can only retry if you have lives left
+            if(state.lives > 0) btnRetry.classList.remove('hidden'); else btnRetry.classList.add('hidden');
             showScreen('s-over');
         }
 
         function submitEmail() {
             const val = document.getElementById('inp-email').value;
             if(val.includes('@')) {
-                state.email = val; saveData();
+                state.email = val; saveUserState();
                 showModal("TICKET SAVED", "You have been entered into the raffle.");
                 document.getElementById('box-email').classList.add('hidden');
                 document.getElementById('box-actions').classList.remove('hidden');
-            } else {
-                showModal("ERROR", "Please enter a valid email address.");
-            }
+            } else { showModal("ERROR", "Please enter a valid email address."); }
         }
 
-        // --- CAMERA ---
+        // --- CAMERA & BACKEND SIMULATION ---
         const video = document.getElementById('video');
         async function openCam() {
             showScreen('s-cam');
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                 video.srcObject = stream;
-                setTimeout(() => redeemLife(), 2500);
+                setTimeout(() => redeemSimulator(), 2500);
             } catch(e) { console.log(e); }
         }
         function closeCam() {
             if(video.srcObject) video.srcObject.getTracks().forEach(t=>t.stop());
             updateUI();
         }
-        function redeemLife() {
+
+        // THIS FUNCTION REPLACES THE REAL BACKEND CALL
+        function redeemSimulator() {
             closeCam();
+            
+            // 1. SIMULATE READING A QR CODE STRING
+            // In a real app, this comes from the QR library
+            const randomCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+            const qrId = "FK-" + randomCode;
+
+            // 2. CALL "DATABASE" TO CHECK IF USED
+            const result = db.redeemCode(qrId);
+
+            if (!result.success) {
+                showModal("ERROR", `Code ${qrId} has already been used!`);
+                return;
+            }
+
+            // 3. SUCCESS LOGIC
+            // Determine Flavor Randomly
+            const flavors = ['orig', 'sugar', 'zero', 'misch'];
+            const found = flavors[Math.floor(Math.random() * flavors.length)];
+            const flavNames = { 'orig': 'ORIGINAL', 'sugar': 'SUGAR FREE', 'zero': 'SUPER ZERO', 'misch': 'MISCHMASCH' };
+
+            // Update Collection
+            let isNew = !state.collection[found];
+            state.collection[found] = true; 
             state.lives++;
-            saveData();
-            showModal("VERIFIED", "+1 LIFE ADDED");
+            saveUserState();
+
+            // 4. SHOW RESULT
+            let msg = `ID: ${qrId}\nFlavor: ${flavNames[found]}\n+1 Life Added.`;
+            if(isNew) msg += "\n\nNEW COLLECTION ITEM UNLOCKED!";
+            
+            showModal("BOTTLE VERIFIED", msg);
             updateUI();
         }
 
-        // --- MODAL LOGIC ---
+        // --- MODAL & UI ---
         function showModal(title, msg) {
             document.getElementById('m-title').innerText = title;
             document.getElementById('m-msg').innerText = msg;
             document.getElementById('modal-overlay').classList.add('open');
         }
-        window.closeModal = function() { 
-            document.getElementById('modal-overlay').classList.remove('open');
-        }
-
-        // --- UTILS & UI ---
-        function saveData() { localStorage.setItem('fk_lives', state.lives); if(state.email) localStorage.setItem('fk_email', state.email); }
+        window.closeModal = function() { document.getElementById('modal-overlay').classList.remove('open'); }
 
         function updateUI() {
             document.getElementById('ui-lives').innerText = state.lives;
             const btnP = document.getElementById('btn-play');
             const btnS = document.getElementById('btn-scan');
-            const msg = document.getElementById('intro-msg');
-
+            const introMsg = document.getElementById('intro-msg');
+            
+            updateVault();
+            const capsFound = Object.values(state.collection).filter(x=>x).length;
+            
             if(state.lives > 0) {
                 btnP.classList.remove('hidden'); btnS.classList.add('hidden');
-                msg.innerText = "System Charged. Ready.";
+                introMsg.innerText = `System Charged. Caps Found: ${capsFound}/4`;
                 showScreen('s-intro');
             } else {
                 btnP.classList.add('hidden'); btnS.classList.remove('hidden');
-                msg.innerText = "Energy Depleted. Scan bottle.";
+                introMsg.innerText = `Energy Depleted. Scan a bottle to play.`;
                 if(state.screen !== 's-cam') showScreen('s-intro');
             }
         }
@@ -540,24 +540,16 @@
         function showScreen(id) {
             state.screen = id;
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            // Hide header on camera/gameover to avoid layering issues
             const header = document.getElementById('main-header');
-            
-            // Hide header if in Camera or Game Over
-            if(id === 's-cam' || id === 's-over') {
-                header.classList.add('fade-out');
-            } else {
-                header.classList.remove('fade-out');
-            }
-
+            if(id === 's-cam' || id === 's-over') header.classList.add('fade-out');
+            else header.classList.remove('fade-out');
             if(id) document.getElementById(id).classList.add('active');
         }
 
-        // --- CONTROLS ---
+        // --- INPUTS ---
         function handleJump(e) {
-            if(state.isPlaying) {
-                if(e.type === 'touchstart') e.preventDefault(); 
-                player.jump();
-            }
+            if(state.isPlaying) { if(e.type === 'touchstart') e.preventDefault(); player.jump(); }
         }
         window.addEventListener('keydown', e => { if(e.code==='Space') handleJump(e); });
         cvs.addEventListener('touchstart', handleJump, {passive: false});
@@ -569,7 +561,10 @@
         document.getElementById('btn-close-cam').onclick = closeCam;
         document.getElementById('btn-retry').onclick = startGame;
         document.getElementById('btn-claim').onclick = submitEmail;
-        document.getElementById('dev-tap').onclick = redeemLife;
+        document.getElementById('dev-tap').onclick = redeemSimulator;
+
+        // Init
+        updateUI();
 
     </script>
 </body>
